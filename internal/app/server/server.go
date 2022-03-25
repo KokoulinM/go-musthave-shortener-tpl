@@ -1,14 +1,13 @@
 package server
 
 import (
-	handler "github.com/KokoulinM/go-musthave-shortener-tpl/internal/handlers"
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/handlers"
 	"log"
 	"net/http"
 )
 
 type Server struct {
-	host    string
-	handler handler.Handler
+	host string
 }
 
 func New(host string) *Server {
@@ -18,8 +17,11 @@ func New(host string) *Server {
 }
 
 func (s *Server) Start() {
-	http.HandleFunc("/", s.handler.Save)
-	http.HandleFunc("/{id:.+}", s.handler.Get)
+	handler := handler.New()
+
+	//http.HandleFunc("/{id:.+}", s.handler.Get)
+	//http.HandleFunc("/", s.handler.Save)
+	http.HandleFunc("/", handler.CommonHandler)
 
 	server := &http.Server{
 		Addr: s.host,
