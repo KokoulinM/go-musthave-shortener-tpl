@@ -21,7 +21,7 @@ func (s *Server) Start() {
 	http.HandleFunc("/", s.handler.Save)
 	http.HandleFunc("/{id:.+}", s.handler.Get)
 
-	server := http.Server{
+	server := &http.Server{
 		Addr: s.host,
 	}
 
