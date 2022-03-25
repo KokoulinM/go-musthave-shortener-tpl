@@ -2,7 +2,6 @@ package handler
 
 import (
 	"errors"
-	"fmt"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/storage"
 	"io"
 	"net/http"
@@ -55,8 +54,7 @@ func (h *Handler) Save(w http.ResponseWriter, r *http.Request) {
 			w.Header().Add("Content-Type", "text/plain; charset=utf-8")
 			w.WriteHeader(http.StatusCreated)
 
-			//@TODO fake small link URL
-			slURL := fmt.Sprintf("%s/%s", r.Host, string(body))
+			slURL := string(body)
 
 			_, err = w.Write([]byte(slURL))
 			if err == nil {
