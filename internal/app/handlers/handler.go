@@ -1,4 +1,4 @@
-package handler
+package handlers
 
 import (
 	"errors"
@@ -123,6 +123,13 @@ func (h *Handler) CommonHandler(w http.ResponseWriter, r *http.Request) {
 //
 //	setBadResponse(w)
 //}
+
+func StatusHandler(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	rw.WriteHeader(http.StatusOK)
+	// намеренно сделана ошибка в JSON
+	rw.Write([]byte(`{"status":"ok"}`))
+}
 
 func setBadResponse(w http.ResponseWriter) {
 	http.Error(w, errors.New("bad request").Error(), http.StatusBadRequest)
