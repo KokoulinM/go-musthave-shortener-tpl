@@ -19,8 +19,6 @@ func New(host string) *Server {
 func (s *Server) Start() {
 	handler := handlers.New()
 
-	//http.HandleFunc("/{id:.+}", s.handler.Get)
-	//http.HandleFunc("/", s.handler.Save)
 	http.HandleFunc("/", handler.CommonHandler)
 
 	server := &http.Server{

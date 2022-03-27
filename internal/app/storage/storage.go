@@ -5,6 +5,11 @@ import (
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/helpers"
 )
 
+type Repository interface {
+	LinkBy(sl string) (string, error)
+	Save(url string) (sl string)
+}
+
 type Storage struct {
 	data map[string]string
 }
