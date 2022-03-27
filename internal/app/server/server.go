@@ -2,6 +2,8 @@ package server
 
 import (
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/handlers"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"log"
 	"net/http"
 )
@@ -17,13 +19,17 @@ func New(host string) *Server {
 }
 
 func (s *Server) Start() {
-	handler := handlers.New()
+	handlers := handlers.New()
 
-	http.HandleFunc("/", handler.CommonHandler)
+	router := chi.NewRouter()
 
-	server := &http.Server{
-		Addr: s.host,
-	}
+	router.Use(middleware.Logger)
+	router.Use(middleware.Recoverer)
 
-	log.Fatal(server.ListenAndServe())
+	router.Route("/", func(r chi.Router) {
+		router.Get("/{id}", handlers.Get)
+		router.Post("/", handlers.Save)
+	})
+
+	log.Fatal(http.ListenAndServe(s.host, router))
 }

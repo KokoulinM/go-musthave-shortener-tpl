@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/storage"
+	"github.com/go-chi/chi/v5"
 	"io"
 	"net/http"
-	"path"
 )
 
 type Handler struct {
@@ -21,23 +21,9 @@ func New() *Handler {
 	}
 }
 
-func (h *Handler) CommonHandler(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case http.MethodGet:
-		h.Get(w, r)
-		return
-	case http.MethodPost:
-		h.Save(w, r)
-		return
-	default:
-		setBadResponse(w)
-		return
-	}
-}
-
 func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
-		id := path.Base(r.URL.String())
+		id := chi.URLParam(r, "id")
 
 		if id == "" {
 			http.Error(w, "The parameter is missing", http.StatusBadRequest)
