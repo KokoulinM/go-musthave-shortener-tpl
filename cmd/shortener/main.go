@@ -5,7 +5,7 @@ import (
 )
 
 func main() {
-	serv := server.New(":8080")
+	serv := server.New("localhost", "8080")
 
 	serv.Start()
 }

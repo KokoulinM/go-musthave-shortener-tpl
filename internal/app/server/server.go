@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
@@ -12,11 +13,13 @@ import (
 
 type Server struct {
 	host string
+	port string
 }
 
-func New(host string) *Server {
+func New(host, port string) *Server {
 	return &Server{
 		host: host,
+		port: port,
 	}
 }
 
@@ -33,5 +36,7 @@ func (s *Server) Start() {
 		router.Post("/", handlers.Save)
 	})
 
-	log.Fatal(http.ListenAndServe(s.host, router))
+	addr := fmt.Sprintf("%s:%s", s.host, s.port)
+
+	log.Fatal(http.ListenAndServe(addr, router))
 }
