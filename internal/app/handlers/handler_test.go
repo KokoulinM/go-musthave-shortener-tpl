@@ -1,14 +1,16 @@
 package handlers
 
 import (
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/storage"
-	"github.com/go-chi/chi/v5"
-	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/stretchr/testify/assert"
+
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/storage"
 )
 
 func TestGetHandler(t *testing.T) {

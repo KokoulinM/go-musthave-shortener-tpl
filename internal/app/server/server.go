@@ -1,11 +1,13 @@
 package server
 
 import (
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/handlers"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 	"log"
 	"net/http"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/handlers"
 )
 
 type Server struct {

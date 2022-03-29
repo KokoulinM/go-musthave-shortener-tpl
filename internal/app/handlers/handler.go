@@ -3,10 +3,12 @@ package handlers
 import (
 	"errors"
 	"fmt"
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/storage"
-	"github.com/go-chi/chi/v5"
 	"io"
 	"net/http"
+
+	"github.com/go-chi/chi/v5"
+
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/storage"
 )
 
 type Handler struct {
