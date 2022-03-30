@@ -14,31 +14,28 @@ type Repository interface {
 
 type Storage struct {
 	data map[string]string
+	mu   sync.Mutex
 }
 
 func (s *Storage) LinkBy(sl string) (string, error) {
-	mu := sync.Mutex{}
-	mu.Lock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 
 	link, ok := s.data[sl]
 	if !ok {
 		return link, errors.New("url not found")
 	}
 
-	mu.Unlock()
-
 	return link, nil
 }
 
 func (s *Storage) Save(url string) (sl string) {
-	mu := sync.Mutex{}
-	mu.Lock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 
 	sl = string(helpers.RandomString(10))
 
 	s.data[sl] = url
-
-	mu.Unlock()
 	return
 }
 
