@@ -57,11 +57,6 @@ func (h *Handler) Save(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//if r.Body != http.NoBody {
-	//	http.Error(w, "the body cannot be an empty", http.StatusBadRequest)
-	//	return
-	//}
-
 	body, err := io.ReadAll(r.Body)
 
 	if err != nil {
