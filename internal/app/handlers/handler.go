@@ -123,6 +123,7 @@ func (h *Handler) SaveJSON(w http.ResponseWriter, r *http.Request) {
 
 	if errMarshal != nil {
 		http.Error(w, "an unexpected error when marshaling JSON", http.StatusInternalServerError)
+		return
 	}
 
 	w.Write(body)

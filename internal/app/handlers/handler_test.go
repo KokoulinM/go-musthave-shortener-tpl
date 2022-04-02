@@ -103,7 +103,7 @@ func TestGetHandler(t *testing.T) {
 	}
 }
 
-func TestPostHandler(t *testing.T) {
+func TestSaveHandler(t *testing.T) {
 	h := New()
 	s := storage.MockStorage{}
 
@@ -165,6 +165,92 @@ func TestPostHandler(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+		})
+	}
+}
+
+func TestHandlerSaveJSON(t *testing.T) {
+	h := New()
+	s := storage.MockStorage{}
+
+	s.GenerateMockData()
+
+	h.storage = &s
+
+	type want struct {
+		code        int
+		response    string
+		contentType string
+		body        string
+	}
+
+	type request struct {
+		method string
+		target string
+		path   string
+		body   string
+	}
+
+	tests := []struct {
+		name    string
+		want    want
+		request request
+	}{
+		{
+			name: "simple test Post handler #1",
+			want: want{
+				code:        http.StatusCreated,
+				response:    "{\"result\":\"http://localhost:8080/ABPHMKKKPH\"}",
+				contentType: "application/json; charset=utf-8",
+			},
+			request: request{
+				method: http.MethodPost,
+				target: "/",
+				path:   "/",
+				body:   "{\"url\":\"https://go.dev/123\"}",
+			},
+		},
+		{
+			name: "negative test Post handler",
+			want: want{
+				code:        http.StatusBadRequest,
+				response:    "the URL property is missing\n",
+				contentType: "text/plain; charset=utf-8",
+			},
+			request: request{
+				method: http.MethodPost,
+				target: "/",
+				path:   "/",
+				body:   "{\"url2\":\"https://go.dev/123\"}",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			reader := strings.NewReader(tt.request.body)
+
+			request := httptest.NewRequest(tt.request.method, tt.request.target, reader)
+
+			w := httptest.NewRecorder()
+
+			router := chi.NewRouter()
+
+			router.Post(tt.request.path, h.SaveJSON)
+
+			router.ServeHTTP(w, request)
+
+			response := w.Result()
+
+			defer response.Body.Close()
+
+			body, _ := ioutil.ReadAll(response.Body)
+
+			assert.Equal(t, tt.want.code, response.StatusCode, "invalid response code")
+
+			assert.Equal(t, tt.want.contentType, response.Header.Get("Content-Type"), "invalid response Content-Type")
+
+			assert.Equal(t, tt.want.response, string(body), "invalid response body")
 		})
 	}
 }
