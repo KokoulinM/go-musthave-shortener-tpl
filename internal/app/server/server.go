@@ -33,7 +33,9 @@ func (s *Server) Start() {
 
 	router.Route("/", func(r chi.Router) {
 		router.Get("/{id}", handlers.Get)
+		router.Get("/", handlers.Get)
 		router.Post("/", handlers.Save)
+		router.Post("/api/shorten", handlers.SaveJSON)
 	})
 
 	addr := fmt.Sprintf("%s:%s", s.host, s.port)

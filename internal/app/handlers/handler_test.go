@@ -49,6 +49,32 @@ func TestGetHandler(t *testing.T) {
 				path:   "/{id}",
 			},
 		},
+		{
+			name: "negative test Get handler without param",
+			want: want{
+				code:        http.StatusBadRequest,
+				response:    "<a href=\"https://go.dev\">Temporary Redirect</a>.\n\n",
+				contentType: "text/plain; charset=utf-8",
+			},
+			request: request{
+				method: http.MethodGet,
+				target: "https://go.dev",
+				path:   "/",
+			},
+		},
+		{
+			name: "negative test Get handler empty row in the storage",
+			want: want{
+				code:        http.StatusNotFound,
+				response:    "<a href=\"https://go.dev\">Temporary Redirect</a>.\n\n",
+				contentType: "text/plain; charset=utf-8",
+			},
+			request: request{
+				method: http.MethodGet,
+				target: "https://vk.com/123",
+				path:   "/{id}",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

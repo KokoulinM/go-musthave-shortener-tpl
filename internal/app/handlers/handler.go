@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -12,6 +13,10 @@ import (
 
 type Handler struct {
 	storage storage.Repository
+}
+
+type URL struct {
+	URL string `json:"url"`
 }
 
 const Host = "http://localhost:8080"
@@ -42,11 +47,6 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if url == "" {
-		http.Error(w, "the URL cannot be an empty string", http.StatusNotFound)
-		return
-	}
-
 	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 	return
 }
@@ -60,7 +60,7 @@ func (h *Handler) Save(w http.ResponseWriter, r *http.Request) {
 	body, err := io.ReadAll(r.Body)
 
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -77,4 +77,53 @@ func (h *Handler) Save(w http.ResponseWriter, r *http.Request) {
 	slURL := fmt.Sprintf("%s/%s", Host, string(sl))
 
 	w.Write([]byte(slURL))
+}
+
+func (h *Handler) SaveJSON(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "only POST requests are allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	body, errReadAll := io.ReadAll(r.Body)
+
+	if errReadAll != nil {
+		http.Error(w, errReadAll.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	url := URL{}
+
+	errUnmarshal := json.Unmarshal(body, &url)
+
+	if errUnmarshal != nil {
+		http.Error(w, "an unexpected error when unmarshaling JSON", http.StatusInternalServerError)
+		return
+	}
+
+	if url.URL == "" {
+		http.Error(w, "the URL property is missing", http.StatusBadRequest)
+		return
+	}
+
+	sl := h.storage.Save(string(body))
+
+	slURL := fmt.Sprintf("%s/%s", Host, string(sl))
+
+	result := struct {
+		Result string `json:"result"`
+	}{
+		Result: slURL,
+	}
+
+	w.Header().Add("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(http.StatusCreated)
+
+	body, errMarshal := json.Marshal(result)
+
+	if errMarshal != nil {
+		http.Error(w, "an unexpected error when marshaling JSON", http.StatusInternalServerError)
+	}
+
+	w.Write(body)
 }
