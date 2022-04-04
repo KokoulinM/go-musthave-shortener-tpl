@@ -1,11 +1,14 @@
 package main
 
 import (
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/configs"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/server"
 )
 
 func main() {
-	serv := server.New("localhost", "8080")
+	conf := configs.New()
+
+	serv := server.New(conf.Host, conf.Port)
 
 	serv.Start()
 }
