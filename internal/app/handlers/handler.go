@@ -48,7 +48,6 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
-	return
 }
 
 func (h *Handler) Save(w http.ResponseWriter, r *http.Request) {
@@ -106,7 +105,7 @@ func (h *Handler) SaveJSON(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sl := h.storage.Save(string(body))
+	sl := h.storage.Save(url.URL)
 
 	slURL := fmt.Sprintf("%s/%s", Host, string(sl))
 
