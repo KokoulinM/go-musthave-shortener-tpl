@@ -48,7 +48,6 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
-	return
 }
 
 func (h *Handler) Save(w http.ResponseWriter, r *http.Request) {
