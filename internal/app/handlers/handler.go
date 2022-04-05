@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/configs"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/storage"
 )
 
@@ -18,8 +19,6 @@ type Handler struct {
 type URL struct {
 	URL string `json:"url"`
 }
-
-const Host = "http://localhost:8080"
 
 func New() *Handler {
 	return &Handler{
@@ -73,7 +72,9 @@ func (h *Handler) Save(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "text/plain; charset=utf-8")
 	w.WriteHeader(http.StatusCreated)
 
-	slURL := fmt.Sprintf("%s/%s", Host, string(sl))
+	conf := configs.New()
+
+	slURL := fmt.Sprintf("%s/%s", conf.BaseURL, string(sl))
 
 	w.Write([]byte(slURL))
 }
@@ -107,7 +108,9 @@ func (h *Handler) SaveJSON(w http.ResponseWriter, r *http.Request) {
 
 	sl := h.storage.Save(url.URL)
 
-	slURL := fmt.Sprintf("%s/%s", Host, string(sl))
+	conf := configs.New()
+
+	slURL := fmt.Sprintf("%s/%s", conf.BaseURL, string(sl))
 
 	result := struct {
 		Result string `json:"result"`

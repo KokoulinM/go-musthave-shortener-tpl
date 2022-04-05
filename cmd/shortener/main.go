@@ -8,7 +8,7 @@ import (
 func main() {
 	conf := configs.New()
 
-	serv := server.New(conf.Host, conf.Port)
+	serv := server.New(conf.ServerAddress)
 
 	serv.Start()
 }

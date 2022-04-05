@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
@@ -12,14 +11,12 @@ import (
 )
 
 type Server struct {
-	host string
-	port string
+	addr string
 }
 
-func New(host, port string) *Server {
+func New(addr string) *Server {
 	return &Server{
-		host: host,
-		port: port,
+		addr: addr,
 	}
 }
 
@@ -38,7 +35,5 @@ func (s *Server) Start() {
 		router.Post("/api/shorten", handlers.SaveJSON)
 	})
 
-	addr := fmt.Sprintf("%s:%s", s.host, s.port)
-
-	log.Fatal(http.ListenAndServe(addr, router))
+	log.Fatal(http.ListenAndServe(s.addr, router))
 }

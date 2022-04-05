@@ -7,8 +7,8 @@ import (
 )
 
 type Config struct {
-	Host string `env:"HOST" envDefault:"localhost"`
-	Port string `env:"PORT" envDefault:"8080"`
+	BaseURL       string `env:"BASE_URL" envDefault:"http://localhost:8080"`
+	ServerAddress string `env:"SERVER_ADDRESS" envDefault:":8080"`
 }
 
 func New() Config {
