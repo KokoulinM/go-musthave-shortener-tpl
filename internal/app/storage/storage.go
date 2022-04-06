@@ -12,12 +12,12 @@ type Repository interface {
 	Save(url string) (sl string)
 }
 
-type Storage struct {
+type storage struct {
 	data map[string]string
 	mu   sync.Mutex
 }
 
-func (s *Storage) LinkBy(sl string) (string, error) {
+func (s *storage) LinkBy(sl string) (string, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -29,7 +29,7 @@ func (s *Storage) LinkBy(sl string) (string, error) {
 	return link, nil
 }
 
-func (s *Storage) Save(url string) (sl string) {
+func (s *storage) Save(url string) (sl string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -39,8 +39,8 @@ func (s *Storage) Save(url string) (sl string) {
 	return
 }
 
-func New() *Storage {
-	return &Storage{
+func New() *storage {
+	return &storage{
 		data: make(map[string]string),
 	}
 }

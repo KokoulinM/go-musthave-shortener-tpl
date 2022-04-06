@@ -14,6 +14,7 @@ import (
 
 type Handler struct {
 	storage storage.Repository
+	Config  configs.Config
 }
 
 type URL struct {
@@ -23,6 +24,7 @@ type URL struct {
 func New() *Handler {
 	return &Handler{
 		storage: storage.New(),
+		Config:  configs.New(),
 	}
 }
 
@@ -72,9 +74,7 @@ func (h *Handler) Save(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "text/plain; charset=utf-8")
 	w.WriteHeader(http.StatusCreated)
 
-	conf := configs.New()
-
-	slURL := fmt.Sprintf("%s/%s", conf.BaseURL, string(sl))
+	slURL := fmt.Sprintf("%s/%s", h.Config.GetBaseURL(), string(sl))
 
 	w.Write([]byte(slURL))
 }
@@ -108,9 +108,7 @@ func (h *Handler) SaveJSON(w http.ResponseWriter, r *http.Request) {
 
 	sl := h.storage.Save(url.URL)
 
-	conf := configs.New()
-
-	slURL := fmt.Sprintf("%s/%s", conf.BaseURL, string(sl))
+	slURL := fmt.Sprintf("%s/%s", h.Config.GetBaseURL(), string(sl))
 
 	result := struct {
 		Result string `json:"result"`

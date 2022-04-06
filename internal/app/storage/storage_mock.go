@@ -6,7 +6,7 @@ import (
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/helpers"
 )
 
-type MockStorage Storage
+type MockStorage storage
 
 var data = map[string]string{
 	"GMWJGSAPGA": "https://go.dev",

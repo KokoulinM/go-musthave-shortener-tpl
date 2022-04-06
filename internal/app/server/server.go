@@ -10,17 +10,13 @@ import (
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/handlers"
 )
 
-type Server struct {
-	addr string
+type server struct{}
+
+func New() *server {
+	return &server{}
 }
 
-func New(addr string) *Server {
-	return &Server{
-		addr: addr,
-	}
-}
-
-func (s *Server) Start() {
+func (s *server) Start() {
 	handlers := handlers.New()
 
 	router := chi.NewRouter()
@@ -35,5 +31,5 @@ func (s *Server) Start() {
 		router.Post("/api/shorten", handlers.SaveJSON)
 	})
 
-	log.Fatal(http.ListenAndServe(s.addr, router))
+	log.Fatal(http.ListenAndServe(handlers.Config.GetServerAddress(), router))
 }
