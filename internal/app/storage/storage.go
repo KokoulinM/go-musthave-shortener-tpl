@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"os"
 	"sync"
 
@@ -116,8 +115,6 @@ func (s *storage) Load(c configs.Config) error {
 	}
 
 	cns.decoder.Decode(&s.Data)
-
-	fmt.Println(s.Data)
 
 	return nil
 }
