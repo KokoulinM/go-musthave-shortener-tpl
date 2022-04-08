@@ -3,6 +3,7 @@ package storage
 import (
 	"errors"
 
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/configs"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/helpers"
 )
 
@@ -39,4 +40,12 @@ func (s *MockStorage) Save(url string) (sl string) {
 	s.Data[sl] = url
 
 	return
+}
+
+func (s *MockStorage) Flush(c configs.Config) error {
+	return nil
+}
+
+func (s *MockStorage) Load(c configs.Config) error {
+	return nil
 }
