@@ -21,7 +21,7 @@ func (s *MockStorage) GenerateMockData() {
 }
 
 func (s *MockStorage) LinkBy(sl string) (string, error) {
-	link, ok := s.data[sl]
+	link, ok := s.Data[sl]
 	if !ok {
 		return link, errors.New("url not found")
 	}
@@ -32,11 +32,11 @@ func (s *MockStorage) LinkBy(sl string) (string, error) {
 func (s *MockStorage) Save(url string) (sl string) {
 	sl = string(helpers.RandomString(10))
 
-	if s.data == nil {
-		s.data = make(map[string]string)
+	if s.Data == nil {
+		s.Data = make(map[string]string)
 	}
 
-	s.data[sl] = url
+	s.Data[sl] = url
 
 	return
 }

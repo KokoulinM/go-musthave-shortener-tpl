@@ -22,10 +22,16 @@ type URL struct {
 }
 
 func New() *Handler {
-	return &Handler{
+	h := &Handler{
 		storage: storage.New(),
 		Config:  configs.New(),
 	}
+
+	if err := h.storage.Load(h.Config); err != nil {
+		panic(err)
+	}
+
+	return h
 }
 
 func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
@@ -69,12 +75,16 @@ func (h *Handler) Save(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sl := h.storage.Save(string(body))
+	origin := string(body)
+
+	short := string(h.storage.Save(origin))
+
+	defer h.storage.Flush(h.Config)
 
 	w.Header().Add("Content-Type", "text/plain; charset=utf-8")
 	w.WriteHeader(http.StatusCreated)
 
-	slURL := fmt.Sprintf("%s/%s", h.Config.GetBaseURL(), string(sl))
+	slURL := fmt.Sprintf("%s/%s", h.Config.BaseURL, short)
 
 	w.Write([]byte(slURL))
 }
@@ -108,7 +118,9 @@ func (h *Handler) SaveJSON(w http.ResponseWriter, r *http.Request) {
 
 	sl := h.storage.Save(url.URL)
 
-	slURL := fmt.Sprintf("%s/%s", h.Config.GetBaseURL(), string(sl))
+	defer h.storage.Flush(h.Config)
+
+	slURL := fmt.Sprintf("%s/%s", h.Config.BaseURL, string(sl))
 
 	result := struct {
 		Result string `json:"result"`

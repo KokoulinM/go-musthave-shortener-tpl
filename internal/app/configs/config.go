@@ -6,31 +6,19 @@ import (
 	"github.com/caarlos0/env/v6"
 )
 
-type Config interface {
-	GetBaseURL() string
-	GetServerAddress() string
+type Config struct {
+	BaseURL         string `env:"BASE_URL" envDefault:"http://localhost:8080"`
+	ServerAddress   string `env:"SERVER_ADDRESS" envDefault:":8080"`
+	FileStoragePath string `env:"FILE_STORAGE_PATH"`
 }
 
-type config struct {
-	baseURL       string `env:"BASE_URL" envDefault:"http://localhost:8080"`
-	serverAddress string `env:"SERVER_ADDRESS" envDefault:":8080"`
-}
+func New() Config {
+	var c Config
 
-func (c config) GetBaseURL() string {
-	return c.baseURL
-}
-
-func (c config) GetServerAddress() string {
-	return c.serverAddress
-}
-
-func New() config {
-	var cfg config
-
-	err := env.Parse(&cfg)
+	err := env.Parse(&c)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return cfg
+	return c
 }

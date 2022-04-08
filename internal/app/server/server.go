@@ -31,5 +31,5 @@ func (s *server) Start() {
 		router.Post("/api/shorten", handlers.SaveJSON)
 	})
 
-	log.Fatal(http.ListenAndServe(handlers.Config.GetServerAddress(), router))
+	log.Fatal(http.ListenAndServe(handlers.Config.ServerAddress, router))
 }
