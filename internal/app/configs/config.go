@@ -1,6 +1,7 @@
 package configs
 
 import (
+	"flag"
 	"log"
 
 	"github.com/caarlos0/env/v6"
@@ -19,6 +20,12 @@ func New() Config {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	flag.StringVar(&c.BaseURL, "b", c.BaseURL, "BaseUrl")
+	flag.StringVar(&c.ServerAddress, "a", c.ServerAddress, "ServerAddress")
+	flag.StringVar(&c.FileStoragePath, "f", c.FileStoragePath, "FileStoragePath")
+
+	flag.Parse()
 
 	return c
 }
