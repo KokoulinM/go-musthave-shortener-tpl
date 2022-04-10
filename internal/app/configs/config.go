@@ -21,9 +21,17 @@ func New() Config {
 		log.Fatal(err)
 	}
 
-	flag.StringVar(&c.BaseURL, "b", c.BaseURL, "BaseUrl")
-	flag.StringVar(&c.ServerAddress, "a", c.ServerAddress, "ServerAddress")
-	flag.StringVar(&c.FileStoragePath, "f", c.FileStoragePath, "FileStoragePath")
+	if flag.Lookup("b") == nil {
+		flag.StringVar(&c.BaseURL, "b", c.BaseURL, "BaseUrl")
+	}
+
+	if flag.Lookup("a") == nil {
+		flag.StringVar(&c.ServerAddress, "a", c.ServerAddress, "ServerAddress")
+	}
+
+	if flag.Lookup("f") == nil {
+		flag.StringVar(&c.FileStoragePath, "f", c.FileStoragePath, "FileStoragePath")
+	}
 
 	flag.Parse()
 
