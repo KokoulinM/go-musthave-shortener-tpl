@@ -17,7 +17,7 @@ func New() *server {
 }
 
 func (s *server) Start() {
-	handlers := handlers.New()
+	h := handlers.New()
 
 	router := chi.NewRouter()
 
@@ -25,11 +25,11 @@ func (s *server) Start() {
 	router.Use(middleware.Recoverer)
 
 	router.Route("/", func(r chi.Router) {
-		router.Get("/{id}", handlers.Get)
-		router.Get("/", handlers.Get)
-		router.Post("/", handlers.Save)
-		router.Post("/api/shorten", handlers.SaveJSON)
+		router.Get("/{id}", h.Get)
+		router.Get("/", h.Get)
+		router.Post("/", h.Save)
+		router.Post("/api/shorten", h.SaveJSON)
 	})
 
-	log.Fatal(http.ListenAndServe(handlers.Config.ServerAddress, router))
+	log.Fatal(http.ListenAndServe(h.Config.ServerAddress, handlers.GzipHandle(router)))
 }
