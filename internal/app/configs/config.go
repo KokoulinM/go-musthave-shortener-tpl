@@ -13,6 +13,10 @@ type Config struct {
 	FileStoragePath string `env:"FILE_STORAGE_PATH"`
 }
 
+func checkExists(f string) bool {
+	return flag.Lookup(f) == nil
+}
+
 func New() Config {
 	var c Config
 
@@ -21,15 +25,15 @@ func New() Config {
 		log.Fatal(err)
 	}
 
-	if flag.Lookup("b") == nil {
+	if checkExists("b") {
 		flag.StringVar(&c.BaseURL, "b", c.BaseURL, "BaseUrl")
 	}
 
-	if flag.Lookup("a") == nil {
+	if checkExists("a") {
 		flag.StringVar(&c.ServerAddress, "a", c.ServerAddress, "ServerAddress")
 	}
 
-	if flag.Lookup("f") == nil {
+	if checkExists("f") {
 		flag.StringVar(&c.FileStoragePath, "f", c.FileStoragePath, "FileStoragePath")
 	}
 
