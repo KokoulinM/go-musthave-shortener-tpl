@@ -45,7 +45,7 @@ func TestGetHandler(t *testing.T) {
 			},
 			request: request{
 				method: http.MethodGet,
-				target: "https://go.dev/GMWJGSAPGA",
+				target: "https://go.dev/GMWJGSAPGA_test_1",
 				path:   "/{id}",
 			},
 		},
@@ -200,7 +200,7 @@ func TestHandlerSaveJSON(t *testing.T) {
 			name: "simple test Post handler #1",
 			want: want{
 				code:        http.StatusCreated,
-				response:    "{\"result\":\"http://localhost:8080/ABPHMKKKPH\"}",
+				response:    "{\"result\":\"http://localhost:8080/CAKKMYDSJD_test_14\"}",
 				contentType: "application/json; charset=utf-8",
 			},
 			request: request{
