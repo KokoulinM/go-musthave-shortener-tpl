@@ -14,20 +14,20 @@ import (
 
 type Handler struct {
 	storage storage.Repository
-	Config  configs.Config
+	config  configs.Config
 }
 
 type URL struct {
 	URL string `json:"url"`
 }
 
-func New() *Handler {
+func New(c configs.Config) *Handler {
 	h := &Handler{
 		storage: storage.New(),
-		Config:  configs.New(),
+		config:  c,
 	}
 
-	if err := h.storage.Load(h.Config); err != nil {
+	if err := h.storage.Load(h.config); err != nil {
 		panic(err)
 	}
 
@@ -79,12 +79,12 @@ func (h *Handler) Save(w http.ResponseWriter, r *http.Request) {
 
 	short := string(h.storage.Save(origin))
 
-	defer h.storage.Flush(h.Config)
+	defer h.storage.Flush(h.config)
 
 	w.Header().Add("Content-Type", "text/plain; charset=utf-8")
 	w.WriteHeader(http.StatusCreated)
 
-	slURL := fmt.Sprintf("%s/%s", h.Config.BaseURL, short)
+	slURL := fmt.Sprintf("%s/%s", h.config.BaseURL, short)
 
 	w.Write([]byte(slURL))
 }
@@ -118,9 +118,9 @@ func (h *Handler) SaveJSON(w http.ResponseWriter, r *http.Request) {
 
 	sl := h.storage.Save(url.URL)
 
-	defer h.storage.Flush(h.Config)
+	defer h.storage.Flush(h.config)
 
-	slURL := fmt.Sprintf("%s/%s", h.Config.BaseURL, string(sl))
+	slURL := fmt.Sprintf("%s/%s", h.config.BaseURL, string(sl))
 
 	result := struct {
 		Result string `json:"result"`
