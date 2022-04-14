@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/configs"
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/assert"
 
@@ -14,7 +15,8 @@ import (
 )
 
 func TestGetHandler(t *testing.T) {
-	h := New()
+	c := configs.New()
+	h := New(c)
 	s := storage.MockStorage{}
 
 	s.GenerateMockData()
@@ -104,7 +106,8 @@ func TestGetHandler(t *testing.T) {
 }
 
 func TestSaveHandler(t *testing.T) {
-	h := New()
+	c := configs.New()
+	h := New(c)
 	s := storage.MockStorage{}
 
 	s.GenerateMockData()
@@ -170,7 +173,8 @@ func TestSaveHandler(t *testing.T) {
 }
 
 func TestHandlerSaveJSON(t *testing.T) {
-	h := New()
+	c := configs.New()
+	h := New(c)
 	s := storage.MockStorage{}
 
 	s.GenerateMockData()
