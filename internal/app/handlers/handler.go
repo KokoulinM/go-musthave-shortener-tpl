@@ -156,7 +156,7 @@ func (h *Handler) SaveJSON(w http.ResponseWriter, r *http.Request) {
 	w.Write(body)
 }
 
-func (h *Handler) getLinks(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) GetLinks(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "only GET requests are allowed", http.StatusMethodNotAllowed)
 		return

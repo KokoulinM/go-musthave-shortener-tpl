@@ -37,6 +37,7 @@ func (s *server) Start() {
 		router.Get("/", h.Get)
 		router.Post("/", h.Save)
 		router.Post("/api/shorten", h.SaveJSON)
+		router.Post("/api/user/urls", h.GetLinks)
 	})
 
 	log.Fatal(http.ListenAndServe(s.addr, middlewares.Conveyor(router, middlewares.GzipMiddleware, middlewares.CookieMiddleware)))
