@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/configs"
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/handlers/middlewares"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
@@ -38,5 +39,5 @@ func (s *server) Start() {
 		router.Post("/api/shorten", h.SaveJSON)
 	})
 
-	log.Fatal(http.ListenAndServe(s.addr, handlers.GzipHandle(router)))
+	log.Fatal(http.ListenAndServe(s.addr, middlewares.Conveyor(router, middlewares.GzipMiddleware, middlewares.CookieMiddleware)))
 }

@@ -11,11 +11,18 @@ import (
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/helpers"
 )
 
+type UserID = string
+
+type ShortLink = string
+
+type ShortLinks = map[ShortLink]string
+
 type Repository interface {
-	LinkBy(sl string) (string, error)
-	Save(url string) (sl string)
+	LinkBy(userID UserID, sl ShortLink) (string, error)
+	Save(userID UserID, url string) ShortLink
 	Load(c configs.Config) error
 	Flush(c configs.Config) error
+	LinksByUser(userID UserID) (ShortLinks, error)
 }
 
 type Producer interface {
@@ -29,7 +36,7 @@ type Consumer interface {
 }
 
 type storage struct {
-	Data map[string]string
+	Data map[UserID]ShortLinks
 	mu   sync.Mutex
 }
 
@@ -45,26 +52,53 @@ type consumer struct {
 	decoder *json.Decoder
 }
 
-func (s *storage) LinkBy(sl string) (string, error) {
+func (s *storage) LinkBy(userID UserID, sl ShortLink) (string, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	link, ok := s.Data[sl]
+	shortLinks, ok := s.Data[userID]
 	if !ok {
-		return link, errors.New("url not found")
+		return "", errors.New("url not found")
 	}
 
-	return link, nil
+	url, ok := shortLinks[sl]
+	if !ok {
+		return "", errors.New("url not found")
+	}
+
+	return url, nil
 }
 
-func (s *storage) Save(url string) (sl string) {
+func (s *storage) LinksByUser(userID UserID) (ShortLinks, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	sl = string(helpers.RandomString(10))
+	shortLinks, ok := s.Data[userID]
 
-	s.Data[sl] = url
-	return
+	if !ok {
+		return shortLinks, errors.New("url not found")
+	}
+
+	return shortLinks, nil
+}
+
+func (s *storage) Save(userID UserID, url string) ShortLink {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	sl := ShortLink(helpers.RandomString(10))
+
+	currentUrls := ShortLinks{}
+
+	if urls, ok := s.Data[userID]; ok {
+		currentUrls = urls
+	}
+
+	currentUrls[sl] = url
+
+	s.Data[userID] = currentUrls
+
+	return sl
 }
 
 func NewProducer(filename string) (*producer, error) {
@@ -137,6 +171,6 @@ func (s *storage) Flush(c configs.Config) error {
 
 func New() *storage {
 	return &storage{
-		Data: make(map[string]string),
+		Data: make(map[UserID]ShortLinks),
 	}
 }

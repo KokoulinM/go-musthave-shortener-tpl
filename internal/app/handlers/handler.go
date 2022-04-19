@@ -9,6 +9,7 @@ import (
 	"github.com/go-chi/chi/v5"
 
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/configs"
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/handlers/middlewares"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/storage"
 )
 
@@ -19,6 +20,11 @@ type Handler struct {
 
 type URL struct {
 	URL string `json:"url"`
+}
+
+type coupleLinks struct {
+	ShortURL    string `json:"short_url"`
+	OriginalURL string `json:"original_url"`
 }
 
 func New(c configs.Config) *Handler {
@@ -47,7 +53,10 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	url, err := h.storage.LinkBy(id)
+	userIDCtx := r.Context().Value(middlewares.UserIDCtxName)
+	userID := userIDCtx.(string)
+
+	url, err := h.storage.LinkBy(userID, id)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
@@ -77,7 +86,10 @@ func (h *Handler) Save(w http.ResponseWriter, r *http.Request) {
 
 	origin := string(body)
 
-	short := string(h.storage.Save(origin))
+	userIDCtx := r.Context().Value(middlewares.UserIDCtxName)
+	userID := userIDCtx.(string)
+
+	short := string(h.storage.Save(userID, origin))
 
 	defer h.storage.Flush(h.config)
 
@@ -116,11 +128,14 @@ func (h *Handler) SaveJSON(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sl := h.storage.Save(url.URL)
+	userIDCtx := r.Context().Value(middlewares.UserIDCtxName)
+	userID := userIDCtx.(string)
+
+	sl := h.storage.Save(userID, url.URL)
 
 	defer h.storage.Flush(h.config)
 
-	slURL := fmt.Sprintf("%s/%s", h.config.BaseURL, string(sl))
+	slURL := fmt.Sprintf("%s/%s", h.config.BaseURL, storage.ShortLink(sl))
 
 	result := struct {
 		Result string `json:"result"`
@@ -139,4 +154,43 @@ func (h *Handler) SaveJSON(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Write(body)
+}
+
+func (h *Handler) getLinks(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "only GET requests are allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	userIDCtx := r.Context().Value(middlewares.UserIDCtxName)
+	userID := userIDCtx.(string)
+
+	links, err := h.storage.LinksByUser(userID)
+
+	if err != nil {
+		http.Error(w, "", http.StatusNoContent)
+		return
+	}
+
+	var lks []coupleLinks
+
+	for v, k := range links {
+		lks = append(lks, coupleLinks{
+			ShortURL:    fmt.Sprintf("%s/%s", h.config.BaseURL, k),
+			OriginalURL: v,
+		})
+	}
+
+	body, err := json.Marshal(lks)
+
+	if err == nil {
+		w.Header().Add("Content-Type", "application/json; charset=utf-8")
+
+		w.WriteHeader(http.StatusOK)
+
+		_, err = w.Write(body)
+		if err == nil {
+			return
+		}
+	}
 }

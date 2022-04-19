@@ -16,30 +16,38 @@ var data = []string{"https://go.dev", "https://mail.google.com", "https://practi
 
 func (s *MockStorage) GenerateMockData() {
 	for _, v := range data {
-		s.Save(v)
+		s.Save("userID", v)
 	}
 }
 
-func (s *MockStorage) LinkBy(sl string) (string, error) {
-	link, ok := s.Data[sl]
-
+func (s *MockStorage) LinkBy(userID, sl string) (string, error) {
+	shortLinks, ok := s.Data[userID]
 	if !ok {
-		return link, errors.New("url not found")
+		return "", errors.New("url not found")
 	}
 
-	return link, nil
+	url, ok := shortLinks[sl]
+	if !ok {
+		return "", errors.New("url not found")
+	}
+
+	return url, nil
 }
 
-func (s *MockStorage) Save(url string) (sl string) {
+func (s *MockStorage) Save(userID, url string) (sl string) {
 	testCount += 1
 
 	sl = string(helpers.RandomString(10) + "_test_" + strconv.Itoa(testCount))
 
-	if s.Data == nil {
-		s.Data = make(map[string]string)
+	currentUrls := ShortLinks{}
+
+	if urls, ok := s.Data[userID]; ok {
+		currentUrls = urls
 	}
 
-	s.Data[sl] = url
+	currentUrls[sl] = url
+
+	s.Data[userID] = currentUrls
 
 	return
 }
