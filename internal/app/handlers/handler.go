@@ -54,7 +54,12 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userIDCtx := r.Context().Value(middlewares.UserIDCtxName)
-	userID := userIDCtx.(string)
+
+	userID := "default"
+
+	if userIDCtx != nil {
+		userID = userIDCtx.(string)
+	}
 
 	url, err := h.storage.LinkBy(userID, id)
 
@@ -87,7 +92,12 @@ func (h *Handler) Save(w http.ResponseWriter, r *http.Request) {
 	origin := string(body)
 
 	userIDCtx := r.Context().Value(middlewares.UserIDCtxName)
-	userID := userIDCtx.(string)
+
+	userID := "default"
+
+	if userIDCtx != nil {
+		userID = userIDCtx.(string)
+	}
 
 	short := string(h.storage.Save(userID, origin))
 
@@ -129,7 +139,12 @@ func (h *Handler) SaveJSON(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userIDCtx := r.Context().Value(middlewares.UserIDCtxName)
-	userID := userIDCtx.(string)
+
+	userID := "default"
+
+	if userIDCtx != nil {
+		userID = userIDCtx.(string)
+	}
 
 	sl := h.storage.Save(userID, url.URL)
 
@@ -163,7 +178,12 @@ func (h *Handler) GetLinks(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userIDCtx := r.Context().Value(middlewares.UserIDCtxName)
-	userID := userIDCtx.(string)
+
+	userID := "default"
+
+	if userIDCtx != nil {
+		userID = userIDCtx.(string)
+	}
 
 	links, err := h.storage.LinksByUser(userID)
 
@@ -174,7 +194,7 @@ func (h *Handler) GetLinks(w http.ResponseWriter, r *http.Request) {
 
 	var lks []coupleLinks
 
-	for v, k := range links {
+	for k, v := range links {
 		lks = append(lks, coupleLinks{
 			ShortURL:    fmt.Sprintf("%s/%s", h.config.BaseURL, k),
 			OriginalURL: v,

@@ -34,10 +34,10 @@ func (s *MockStorage) LinkBy(userID, sl string) (string, error) {
 	return url, nil
 }
 
-func (s *MockStorage) Save(userID, url string) (sl string) {
+func (s *MockStorage) Save(userID UserID, url string) ShortLink {
 	testCount += 1
 
-	sl = string(helpers.RandomString(10) + "_test_" + strconv.Itoa(testCount))
+	sl := string(helpers.RandomString(10) + "_test_" + strconv.Itoa(testCount))
 
 	currentUrls := ShortLinks{}
 
@@ -49,7 +49,7 @@ func (s *MockStorage) Save(userID, url string) (sl string) {
 
 	s.Data[userID] = currentUrls
 
-	return
+	return sl
 }
 
 func (s *MockStorage) Flush(c configs.Config) error {
@@ -58,4 +58,8 @@ func (s *MockStorage) Flush(c configs.Config) error {
 
 func (s *MockStorage) Load(c configs.Config) error {
 	return nil
+}
+
+func (s *MockStorage) LinksByUser(userID UserID) (ShortLinks, error) {
+	return ShortLinks{}, nil
 }

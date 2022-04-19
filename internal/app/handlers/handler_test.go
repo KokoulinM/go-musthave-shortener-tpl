@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -8,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/configs"
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/handlers/middlewares"
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/assert"
 
@@ -17,7 +19,9 @@ import (
 func TestGetHandler(t *testing.T) {
 	c := configs.New()
 	h := New(c)
-	s := storage.MockStorage{}
+	s := storage.MockStorage{
+		Data: make(map[storage.UserID]storage.ShortLinks),
+	}
 
 	s.GenerateMockData()
 
@@ -88,7 +92,7 @@ func TestGetHandler(t *testing.T) {
 
 			router.Get(tt.request.path, h.Get)
 
-			router.ServeHTTP(w, request)
+			router.ServeHTTP(w, request.WithContext(context.WithValue(request.Context(), middlewares.UserIDCtxName, "userID")))
 
 			response := w.Result()
 
@@ -108,7 +112,9 @@ func TestGetHandler(t *testing.T) {
 func TestSaveHandler(t *testing.T) {
 	c := configs.New()
 	h := New(c)
-	s := storage.MockStorage{}
+	s := storage.MockStorage{
+		Data: make(map[storage.UserID]storage.ShortLinks),
+	}
 
 	s.GenerateMockData()
 
@@ -175,7 +181,9 @@ func TestSaveHandler(t *testing.T) {
 func TestHandlerSaveJSON(t *testing.T) {
 	c := configs.New()
 	h := New(c)
-	s := storage.MockStorage{}
+	s := storage.MockStorage{
+		Data: make(map[storage.UserID]storage.ShortLinks),
+	}
 
 	s.GenerateMockData()
 
