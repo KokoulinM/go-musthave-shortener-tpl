@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -188,7 +189,7 @@ func (h *Handler) GetLinks(w http.ResponseWriter, r *http.Request) {
 	links, err := h.storage.LinksByUser(userID)
 
 	if err != nil {
-		http.Error(w, "", http.StatusNoContent)
+		http.Error(w, errors.New("no content").Error(), http.StatusNoContent)
 		return
 	}
 

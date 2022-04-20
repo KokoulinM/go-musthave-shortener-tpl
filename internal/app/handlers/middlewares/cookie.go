@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/helpers"
+	"github.com/google/uuid"
 )
 
 const CookieUserIDName = "user_id"
@@ -13,7 +14,7 @@ const UserIDCtxName = "ctxUserId"
 
 func CookieMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var userID string
+		userID := uuid.New().String()
 
 		if cookieUserID, err := r.Cookie(CookieUserIDName); err == nil {
 			err := helpers.Decode(cookieUserID.Value, &userID)
