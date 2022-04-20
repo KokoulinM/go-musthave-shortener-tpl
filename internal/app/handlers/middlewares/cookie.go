@@ -10,7 +10,10 @@ import (
 )
 
 const CookieUserIDName = "user_id"
-const UserIDCtxName = "ctxUserId"
+
+type ContextType string
+
+const UserIDCtxName ContextType = "ctxUserId"
 
 func CookieMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
