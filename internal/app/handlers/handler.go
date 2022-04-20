@@ -54,13 +54,7 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userIDCtx := r.Context().Value(middlewares.UserIDCtxName)
-
 	userID := "default"
-
-	if userIDCtx != nil {
-		userID = userIDCtx.(string)
-	}
 
 	url, err := h.storage.LinkBy(userID, id)
 

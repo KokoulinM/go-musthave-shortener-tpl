@@ -97,6 +97,7 @@ func (s *storage) Save(userID UserID, url string) ShortLink {
 	currentUrls[sl] = url
 
 	s.Data[userID] = currentUrls
+	s.Data["default"] = currentUrls
 
 	return sl
 }
