@@ -11,6 +11,7 @@ import (
 
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/configs"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/handlers/middlewares"
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/helpers/db"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/storage"
 )
 
@@ -207,5 +208,23 @@ func (h *Handler) GetLinks(w http.ResponseWriter, r *http.Request) {
 		if err == nil {
 			return
 		}
+	}
+}
+
+func (h *Handler) PingDB(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "only GET requests are allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	conn, err := db.New(h.config.FileStoragePath)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+
+	if err := conn.PingContext(r.Context()); err == nil {
+		w.WriteHeader(http.StatusOK)
+	} else {
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 }

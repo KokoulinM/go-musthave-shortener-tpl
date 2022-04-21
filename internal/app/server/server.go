@@ -38,6 +38,7 @@ func (s *server) Start() {
 		router.Post("/", h.Save)
 		router.Post("/api/shorten", h.SaveJSON)
 		router.Get("/api/user/urls", h.GetLinks)
+		router.Get("/ping", h.PingDB)
 	})
 
 	log.Fatal(http.ListenAndServe(s.addr, middlewares.Conveyor(router, middlewares.GzipMiddleware, middlewares.CookieMiddleware)))
