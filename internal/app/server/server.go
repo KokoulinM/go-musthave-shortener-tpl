@@ -1,9 +1,11 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -48,5 +50,18 @@ func (s *server) Start() {
 		router.Get("/ping", h.PingDB)
 	})
 
-	log.Fatal(http.ListenAndServe(s.addr, middlewares.Conveyor(router, middlewares.GzipMiddleware, middlewares.CookieMiddleware)))
+	srv := &http.Server{
+		Addr:    s.addr,
+		Handler: middlewares.Conveyor(router, middlewares.GzipMiddleware, middlewares.CookieMiddleware),
+	}
+
+	log.Fatal(http.ListenAndServe(srv.Addr, srv.Handler))
+
+	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 5*time.Second)
+
+	defer shutdownCancel()
+
+	if srv != nil {
+		_ = srv.Shutdown(shutdownCtx)
+	}
 }

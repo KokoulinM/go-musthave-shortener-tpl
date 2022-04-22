@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"database/sql"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -9,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/configs"
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/database"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/handlers/middlewares"
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/assert"
@@ -18,7 +20,8 @@ import (
 
 func TestGetHandler(t *testing.T) {
 	c := configs.New()
-	h := New(c)
+	db := database.New(new(sql.DB))
+	h := New(c, db)
 	s := storage.MockStorage{
 		Data: make(map[storage.UserID]storage.ShortLinks),
 	}
@@ -111,7 +114,8 @@ func TestGetHandler(t *testing.T) {
 
 func TestSaveHandler(t *testing.T) {
 	c := configs.New()
-	h := New(c)
+	db := database.New(new(sql.DB))
+	h := New(c, db)
 	s := storage.MockStorage{
 		Data: make(map[storage.UserID]storage.ShortLinks),
 	}
@@ -180,7 +184,8 @@ func TestSaveHandler(t *testing.T) {
 
 func TestHandlerSaveJSON(t *testing.T) {
 	c := configs.New()
-	h := New(c)
+	db := database.New(new(sql.DB))
+	h := New(c, db)
 	s := storage.MockStorage{
 		Data: make(map[storage.UserID]storage.ShortLinks),
 	}
