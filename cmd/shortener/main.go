@@ -15,17 +15,19 @@ func main() {
 	fmt.Println("main started")
 	defer fmt.Println("main finished")
 
-	c := configs.New()
+	cfg := configs.New()
 
-	serv := server.New(c.ServerAddress, c)
+	serv := server.New(cfg.ServerAddress, cfg)
 
-	conn, err := db.New(c.DatabaseDSN)
+	conn, err := db.New(cfg.DatabaseDSN)
 	if err != nil {
 		log.Println("Closing connect to db")
 		err := conn.Close()
 		if err != nil {
 			log.Println("Closing don't close")
 		}
+
+		log.Fatal(err)
 	}
 
 	serv.Start()
