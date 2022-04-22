@@ -217,7 +217,7 @@ func (h *Handler) PingDB(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	conn, err := db.New(h.config.FileStoragePath)
+	conn, err := db.Instance()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
