@@ -3,9 +3,10 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
+	"syscall"
 
-	//_ "github.com/jackc/pgx/stdlib"
-	_ "github.com/lib/pq"
+	_ "github.com/jackc/pgx/stdlib"
 
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/configs"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/database"
@@ -19,7 +20,7 @@ func main() {
 
 	cfg := configs.New()
 
-	conn, err := db.Conn(cfg.DatabaseDSN)
+	conn, err := db.Conn("pgx", cfg.DatabaseDSN)
 	if err != nil {
 		log.Println("Closing connect to db")
 		err := conn.Close()
@@ -32,5 +33,17 @@ func main() {
 
 	serv := server.New(cfg.ServerAddress, cfg, db)
 
-	serv.Start()
+	go func() {
+		serv.Start()
+	}()
+
+	interrupt := make(chan os.Signal, 1)
+
+	killSignal := <-interrupt
+	switch killSignal {
+	case os.Interrupt:
+		fmt.Println("Got SIGINT...")
+	case syscall.SIGTERM:
+		fmt.Println("Got SIGTERM...")
+	}
 }
