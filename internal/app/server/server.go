@@ -55,8 +55,6 @@ func (s *server) Start() {
 		Handler: middlewares.Conveyor(router, middlewares.GzipMiddleware, middlewares.CookieMiddleware),
 	}
 
-	log.Fatal(http.ListenAndServe(srv.Addr, srv.Handler))
-
 	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 5*time.Second)
 
 	defer shutdownCancel()
@@ -64,4 +62,6 @@ func (s *server) Start() {
 	if srv != nil {
 		_ = srv.Shutdown(shutdownCtx)
 	}
+
+	log.Fatal(http.ListenAndServe(srv.Addr, srv.Handler))
 }
