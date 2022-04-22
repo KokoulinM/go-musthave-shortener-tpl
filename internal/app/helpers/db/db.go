@@ -9,6 +9,9 @@ import (
 var instance *sql.DB
 
 func New(dsn string) (*sql.DB, error) {
+	fmt.Println("db started")
+	defer fmt.Println("db finished")
+
 	if instance == nil {
 		instance = new(sql.DB)
 

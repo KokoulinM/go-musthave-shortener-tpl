@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	_ "github.com/jackc/pgx/stdlib"
@@ -11,6 +12,9 @@ import (
 )
 
 func main() {
+	fmt.Println("main started")
+	defer fmt.Println("main finished")
+
 	c := configs.New()
 
 	serv := server.New(c.ServerAddress, c)

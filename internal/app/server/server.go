@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
@@ -18,6 +19,9 @@ type server struct {
 }
 
 func New(addr string, config configs.Config) *server {
+	fmt.Println("server started")
+	defer fmt.Println("server finished")
+
 	return &server{
 		addr:   addr,
 		config: config,
