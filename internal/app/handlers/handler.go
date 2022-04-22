@@ -10,14 +10,15 @@ import (
 	"github.com/go-chi/chi/v5"
 
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/configs"
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/database"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/handlers/middlewares"
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/helpers/db"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/storage"
 )
 
 type Handler struct {
 	storage storage.Repository
 	config  configs.Config
+	db      *database.PostgresDatabase
 }
 
 type URL struct {
@@ -29,10 +30,11 @@ type coupleLinks struct {
 	OriginalURL string `json:"original_url"`
 }
 
-func New(c configs.Config) *Handler {
+func New(c configs.Config, db *database.PostgresDatabase) *Handler {
 	h := &Handler{
 		storage: storage.New(),
 		config:  c,
+		db:      db,
 	}
 
 	if err := h.storage.Load(h.config); err != nil {
@@ -217,14 +219,10 @@ func (h *Handler) PingDB(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	conn, err := db.Instance()
+	err := h.db.Ping(r.Context())
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
-	if err := conn.PingContext(r.Context()); err == nil {
-		w.WriteHeader(http.StatusOK)
-	} else {
-		w.WriteHeader(http.StatusInternalServerError)
-	}
+	w.WriteHeader(http.StatusOK)
 }
