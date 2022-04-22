@@ -13,7 +13,7 @@ func Conn(dsn string) (*sql.DB, error) {
 		return instance, fmt.Errorf("dsn can not be missing")
 	}
 
-	inst, err := sql.Open("pgx", dsn)
+	inst, err := sql.Open("postgres", dsn)
 	if err != nil {
 		return instance, err
 	}

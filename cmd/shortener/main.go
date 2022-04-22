@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/database"
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/helpers/db"
-	_ "github.com/jackc/pgx/stdlib"
+	//_ "github.com/jackc/pgx/stdlib"
+	_ "github.com/lib/pq"
 
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/configs"
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/database"
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/helpers/db"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/server"
 )
 
