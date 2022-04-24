@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -24,6 +23,7 @@ func main() {
 
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
+	defer signal.Stop(interrupt)
 
 	cfg := configs.New()
 
@@ -55,11 +55,10 @@ func main() {
 		serv.Start()
 	}()
 
-	killSignal := <-interrupt
-	switch killSignal {
-	case os.Interrupt:
-		fmt.Println("Got SIGINT...")
-	case syscall.SIGTERM:
-		fmt.Println("Got SIGTERM...")
+	select {
+	case <-interrupt:
+		break
+	case <-ctx.Done():
+		break
 	}
 }
