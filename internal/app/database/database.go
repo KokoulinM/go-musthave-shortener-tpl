@@ -7,17 +7,17 @@ import (
 )
 
 type PostgresDatabase struct {
-	conn *sql.DB
+	Conn *sql.DB
 }
 
 func New(conn *sql.DB) *PostgresDatabase {
 	return &PostgresDatabase{
-		conn: conn,
+		Conn: conn,
 	}
 }
 
 func (db *PostgresDatabase) Ping(ctx context.Context) error {
-	err := db.conn.PingContext(ctx)
+	err := db.Conn.PingContext(ctx)
 	if err != nil {
 		fmt.Println(err)
 		return err

@@ -30,7 +30,7 @@ type coupleLinks struct {
 	OriginalURL string `json:"original_url"`
 }
 
-func New(c configs.Config, db *database.PostgresDatabase) *Handler {
+func New(db *database.PostgresDatabase, c configs.Config) *Handler {
 	h := &Handler{
 		storage: storage.New(),
 		config:  c,

@@ -13,12 +13,14 @@ func Conn(driverName, dsn string) (*sql.DB, error) {
 		return instance, fmt.Errorf("dsn can not be missing")
 	}
 
-	inst, err := sql.Open(driverName, dsn)
+	if driverName == "" {
+		return instance, fmt.Errorf("driver name can not be missing")
+	}
+
+	instance, err := sql.Open(driverName, dsn)
 	if err != nil {
 		return instance, err
 	}
-
-	instance = inst
 
 	log.Println("Connect to database")
 

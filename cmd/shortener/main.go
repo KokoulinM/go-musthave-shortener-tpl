@@ -11,12 +11,12 @@ import (
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/configs"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/database"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/helpers/db"
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/router"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/server"
 )
 
 func main() {
-	fmt.Println("main started")
-	defer fmt.Println("main finished")
+	interrupt := make(chan os.Signal, 1)
 
 	cfg := configs.New()
 
@@ -31,13 +31,15 @@ func main() {
 
 	db := database.New(conn)
 
-	serv := server.New(cfg.ServerAddress, cfg, db)
+	defer db.Conn.Close()
+
+	handler := router.New(db, cfg)
+
+	serv := server.New(db, cfg.ServerAddress, handler, cfg)
 
 	go func() {
 		serv.Start()
 	}()
-
-	interrupt := make(chan os.Signal, 1)
 
 	killSignal := <-interrupt
 	switch killSignal {
