@@ -8,11 +8,11 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/helpers"
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/models"
 	"github.com/go-chi/chi/v5"
 
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/handlers/middlewares"
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/helpers"
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/models"
 )
 
 type Repository interface {

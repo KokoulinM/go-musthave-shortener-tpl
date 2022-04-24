@@ -4,8 +4,9 @@ import (
 	"flag"
 	"log"
 
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/helpers"
 	"github.com/caarlos0/env/v6"
+
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/helpers"
 )
 
 type Config struct {
