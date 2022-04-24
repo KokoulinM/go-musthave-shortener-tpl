@@ -4,7 +4,6 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"encoding/hex"
-	"fmt"
 
 	"github.com/google/uuid"
 )
@@ -21,7 +20,6 @@ func New(key []byte) (*Encryptor, error) {
 
 	aesblock, err := aes.NewCipher(key)
 	if err != nil {
-		fmt.Errorf("error: %v\n", err)
 		return nil, err
 	}
 
@@ -39,7 +37,6 @@ func (e *Encryptor) Encode(value []byte) string {
 func (e *Encryptor) Decode(value string) (string, error) {
 	encrypted, err := hex.DecodeString(value)
 	if err != nil {
-		fmt.Errorf("error: %v\n", err)
 		return "", err
 	}
 
