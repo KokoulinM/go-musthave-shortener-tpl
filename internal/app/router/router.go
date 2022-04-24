@@ -5,12 +5,11 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/configs"
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/database"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/handlers"
 )
 
-func New(db *database.PostgresDatabase, cfg configs.Config) *chi.Mux {
-	h := handlers.New(db, cfg)
+func New(repo handlers.Repository, cfg configs.Config) *chi.Mux {
+	h := handlers.New(repo, cfg.BaseURL)
 
 	router := chi.NewRouter()
 

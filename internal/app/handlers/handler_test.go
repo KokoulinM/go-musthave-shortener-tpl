@@ -21,7 +21,7 @@ import (
 func TestGetHandler(t *testing.T) {
 	c := configs.New()
 	db := database.New(new(sql.DB))
-	h := New(c, db)
+	h := New(db, c)
 	s := storage.MockStorage{
 		Data: make(map[storage.UserID]storage.ShortLinks),
 	}
@@ -115,7 +115,7 @@ func TestGetHandler(t *testing.T) {
 func TestSaveHandler(t *testing.T) {
 	c := configs.New()
 	db := database.New(new(sql.DB))
-	h := New(c, db)
+	h := New(db, c)
 	s := storage.MockStorage{
 		Data: make(map[storage.UserID]storage.ShortLinks),
 	}
@@ -185,7 +185,7 @@ func TestSaveHandler(t *testing.T) {
 func TestHandlerSaveJSON(t *testing.T) {
 	c := configs.New()
 	db := database.New(new(sql.DB))
-	h := New(c, db)
+	h := New(db, c)
 	s := storage.MockStorage{
 		Data: make(map[storage.UserID]storage.ShortLinks),
 	}

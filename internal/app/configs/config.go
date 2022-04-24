@@ -4,6 +4,7 @@ import (
 	"flag"
 	"log"
 
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/helpers"
 	"github.com/caarlos0/env/v6"
 )
 
@@ -12,6 +13,7 @@ type Config struct {
 	ServerAddress   string `env:"SERVER_ADDRESS" envDefault:":8080"`
 	FileStoragePath string `env:"FILE_STORAGE_PATH"`
 	DatabaseDSN     string `env:"DATABASE_DSN" envDefault:"user=postgres password=postgres"`
+	Key             []byte
 }
 
 func checkExists(f string) bool {
@@ -20,6 +22,8 @@ func checkExists(f string) bool {
 
 func New() Config {
 	var c Config
+
+	c.Key, _ = helpers.GenerateRandom(16)
 
 	err := env.Parse(&c)
 	if err != nil {

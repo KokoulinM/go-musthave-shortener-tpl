@@ -4,20 +4,42 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/handlers"
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/models"
 )
 
 type PostgresDatabase struct {
-	Conn *sql.DB
+	conn    *sql.DB
+	baseURL string
 }
 
-func New(conn *sql.DB) *PostgresDatabase {
-	return &PostgresDatabase{
-		Conn: conn,
+func NewRepository(baseURL string, db *sql.DB) *PostgresDatabase {
+	result := &PostgresDatabase{
+		conn:    db,
+		baseURL: baseURL,
 	}
+	return result
+}
+
+func New(baseURL string, db *sql.DB) handlers.Repository {
+	return handlers.Repository(NewRepository(baseURL, db))
+}
+
+func (db *PostgresDatabase) AddURL(ctx context.Context, longURL models.LongURL, shortURL models.ShortURL, user models.UserID) error {
+	return nil
+}
+
+func (db *PostgresDatabase) GetURL(ctx context.Context, shortURL models.ShortURL) (models.ShortURL, error) {
+	return "", nil
+}
+
+func (db *PostgresDatabase) GetUserURLs(ctx context.Context, user models.UserID) ([]handlers.ResponseGetURL, error) {
+	return nil, nil
 }
 
 func (db *PostgresDatabase) Ping(ctx context.Context) error {
-	err := db.Conn.PingContext(ctx)
+	err := db.conn.PingContext(ctx)
 	if err != nil {
 		fmt.Println(err)
 		return err

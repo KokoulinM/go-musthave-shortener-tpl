@@ -1,47 +1,46 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
 
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/helpers"
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/models"
 	"github.com/go-chi/chi/v5"
 
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/configs"
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/database"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/handlers/middlewares"
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/storage"
 )
 
+type Repository interface {
+	AddURL(ctx context.Context, longURL models.LongURL, shortURL models.ShortURL, user models.UserID) error
+	GetURL(ctx context.Context, shortURL models.ShortURL) (models.ShortURL, error)
+	GetUserURLs(ctx context.Context, user models.UserID) ([]ResponseGetURL, error)
+	Ping(ctx context.Context) error
+}
+
 type Handler struct {
-	storage storage.Repository
-	config  configs.Config
-	db      *database.PostgresDatabase
+	repo    Repository
+	baseURL string
 }
 
 type URL struct {
 	URL string `json:"url"`
 }
 
-type coupleLinks struct {
+type ResponseGetURL struct {
 	ShortURL    string `json:"short_url"`
 	OriginalURL string `json:"original_url"`
 }
 
-func New(db *database.PostgresDatabase, c configs.Config) *Handler {
-	h := &Handler{
-		storage: storage.New(),
-		config:  c,
-		db:      db,
+func New(repo Repository, baseURL string) *Handler {
+	return &Handler{
+		repo:    repo,
+		baseURL: baseURL,
 	}
-
-	if err := h.storage.Load(h.config); err != nil {
-		panic(err)
-	}
-
-	return h
 }
 
 func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
@@ -51,16 +50,12 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 	}
 
 	id := chi.URLParam(r, "id")
-
 	if id == "" {
 		http.Error(w, "the parameter is missing", http.StatusBadRequest)
 		return
 	}
 
-	userID := "default"
-
-	url, err := h.storage.LinkBy(userID, id)
-
+	url, err := h.repo.GetURL(r.Context(), id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
@@ -75,6 +70,8 @@ func (h *Handler) Save(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	defer r.Body.Close()
+
 	body, err := io.ReadAll(r.Body)
 
 	if err != nil {
@@ -87,8 +84,6 @@ func (h *Handler) Save(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	origin := string(body)
-
 	userIDCtx := r.Context().Value(middlewares.UserIDCtxName)
 
 	userID := "default"
@@ -97,14 +92,18 @@ func (h *Handler) Save(w http.ResponseWriter, r *http.Request) {
 		userID = userIDCtx.(string)
 	}
 
-	short := string(h.storage.Save(userID, origin))
+	longURL := models.LongURL(body)
+	shortURL := models.ShortURL(helpers.RandomString(10))
 
-	defer h.storage.Flush(h.config)
+	err = h.repo.AddURL(r.Context(), longURL, shortURL, userID)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 
 	w.Header().Add("Content-Type", "text/plain; charset=utf-8")
 	w.WriteHeader(http.StatusCreated)
 
-	slURL := fmt.Sprintf("%s/%s", h.config.BaseURL, short)
+	slURL := fmt.Sprintf("%s/%s", h.baseURL, shortURL)
 
 	w.Write([]byte(slURL))
 }
@@ -115,8 +114,9 @@ func (h *Handler) SaveJSON(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	body, errReadAll := io.ReadAll(r.Body)
+	defer r.Body.Close()
 
+	body, errReadAll := io.ReadAll(r.Body)
 	if errReadAll != nil {
 		http.Error(w, errReadAll.Error(), http.StatusInternalServerError)
 		return
@@ -124,9 +124,8 @@ func (h *Handler) SaveJSON(w http.ResponseWriter, r *http.Request) {
 
 	url := URL{}
 
-	errUnmarshal := json.Unmarshal(body, &url)
-
-	if errUnmarshal != nil {
+	err := json.Unmarshal(body, &url)
+	if err != nil {
 		http.Error(w, "an unexpected error when unmarshaling JSON", http.StatusInternalServerError)
 		return
 	}
@@ -144,11 +143,14 @@ func (h *Handler) SaveJSON(w http.ResponseWriter, r *http.Request) {
 		userID = userIDCtx.(string)
 	}
 
-	sl := h.storage.Save(userID, url.URL)
+	shortURL := models.ShortURL(helpers.RandomString(10))
 
-	defer h.storage.Flush(h.config)
+	err = h.repo.AddURL(r.Context(), url.URL, shortURL, userID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 
-	slURL := fmt.Sprintf("%s/%s", h.config.BaseURL, storage.ShortLink(sl))
+	slURL := fmt.Sprintf("%s/%s", h.baseURL, shortURL)
 
 	result := struct {
 		Result string `json:"result"`
@@ -159,9 +161,8 @@ func (h *Handler) SaveJSON(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusCreated)
 
-	body, errMarshal := json.Marshal(result)
-
-	if errMarshal != nil {
+	body, err = json.Marshal(result)
+	if err != nil {
 		http.Error(w, "an unexpected error when marshaling JSON", http.StatusInternalServerError)
 		return
 	}
@@ -183,23 +184,13 @@ func (h *Handler) GetLinks(w http.ResponseWriter, r *http.Request) {
 		userID = userIDCtx.(string)
 	}
 
-	links, err := h.storage.LinksByUser(userID)
-
+	urls, err := h.repo.GetUserURLs(r.Context(), userID)
 	if err != nil {
 		http.Error(w, errors.New("no content").Error(), http.StatusNoContent)
 		return
 	}
 
-	var lks []coupleLinks
-
-	for k, v := range links {
-		lks = append(lks, coupleLinks{
-			ShortURL:    fmt.Sprintf("%s/%s", h.config.BaseURL, k),
-			OriginalURL: v,
-		})
-	}
-
-	body, err := json.Marshal(lks)
+	body, err := json.Marshal(urls)
 
 	if err == nil {
 		w.Header().Add("Content-Type", "application/json; charset=utf-8")
@@ -219,7 +210,7 @@ func (h *Handler) PingDB(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := h.db.Ping(r.Context())
+	err := h.repo.Ping(r.Context())
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}

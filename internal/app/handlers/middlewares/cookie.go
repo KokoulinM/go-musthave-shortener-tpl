@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/helpers"
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/helpers/encryptor"
 	"github.com/google/uuid"
 )
 
@@ -15,27 +16,31 @@ type ContextType string
 
 const UserIDCtxName ContextType = "ctxUserId"
 
-func CookieMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		userID := uuid.New().String()
+func CookieMiddleware(key []byte) func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			cookieUserID, _ := r.Cookie(CookieUserIDName)
+			encryptor, err := encryptor.New(key)
 
-		if cookieUserID, err := r.Cookie(CookieUserIDName); err == nil {
-			err := helpers.Decode(cookieUserID.Value, &userID)
-
+			fmt.Println(encryptor)
 			if err != nil {
-				fmt.Printf("error: %v\n", err)
+				return
 			}
-		}
 
-		encoded, err := helpers.Encode(userID)
+			if cookieUserID != nil {
+				userID, err := encryptor.Decode(cookieUserID.Value)
 
-		if err == nil {
+				if err == nil {
+					next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), UserIDCtxName, userID)))
+					return
+				}
+			}
+			userID := uuid.New().String()
+			encoded := encryptor.Encode([]byte(userID))
 			cookie := helpers.CreateCookie(CookieUserIDName, encoded)
-			http.SetCookie(w, cookie)
-		} else {
-			fmt.Printf("error: %v\n", err)
-		}
 
-		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), UserIDCtxName, userID)))
-	})
+			http.SetCookie(w, cookie)
+			next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), UserIDCtxName, userID)))
+		})
+	}
 }
