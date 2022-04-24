@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -51,15 +50,5 @@ func main() {
 
 	serv := server.New(cfg.ServerAddress, cfg.Key, handler)
 
-	go func() {
-		serv.Start()
-	}()
-
-	killSignal := <-interrupt
-	switch killSignal {
-	case os.Interrupt:
-		fmt.Println("Got SIGINT...")
-	case syscall.SIGTERM:
-		fmt.Println("Got SIGTERM...")
-	}
+	serv.Start()
 }
