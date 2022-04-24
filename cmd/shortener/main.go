@@ -29,6 +29,8 @@ func main() {
 
 	var repo handlers.Repository
 
+	log.Println(cfg)
+
 	if cfg.DatabaseDSN != "" {
 		conn, err := db.Conn("pgx", cfg.DatabaseDSN)
 		if err != nil {
