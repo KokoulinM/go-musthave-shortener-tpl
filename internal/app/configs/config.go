@@ -4,6 +4,7 @@ import (
 	"flag"
 	"log"
 
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/helpers"
 	"github.com/caarlos0/env/v6"
 )
 
@@ -22,8 +23,7 @@ func checkExists(f string) bool {
 func New() Config {
 	var c Config
 
-	//c.Key, _ = helpers.GenerateRandom(16)
-	c.Key = make([]byte, 16)
+	c.Key, _ = helpers.GenerateRandom(16)
 
 	err := env.Parse(&c)
 	if err != nil {
