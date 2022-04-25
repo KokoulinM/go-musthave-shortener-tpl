@@ -150,7 +150,7 @@ func (h *Handler) SaveJSON(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
-	slURL := fmt.Sprintf("%s/%s", h.baseURL, shortURL)
+	slURL := fmt.Sprintf("%s%s", h.baseURL, shortURL)
 
 	result := struct {
 		Result string `json:"result"`
