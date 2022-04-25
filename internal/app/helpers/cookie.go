@@ -9,6 +9,6 @@ func CreateCookie(name, value string) *http.Cookie {
 		Name:   name,
 		Value:  value,
 		Path:   "/",
-		Secure: false,
+		Secure: true,
 	}
 }
