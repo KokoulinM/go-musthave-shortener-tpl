@@ -1,4 +1,4 @@
-package storage
+package storages
 
 //
 //import (
@@ -9,7 +9,7 @@ package storage
 //	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/helpers"
 //)
 //
-//type MockStorage storage
+//type MockStorage storages
 //
 //var testCount = 0
 //

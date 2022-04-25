@@ -1,4 +1,4 @@
-package database
+package storages
 
 import (
 	"context"
@@ -14,15 +14,15 @@ type PostgresDatabase struct {
 	baseURL string
 }
 
-func NewRepository(baseURL string, db *sql.DB) *PostgresDatabase {
+func DatabaseRepository(baseURL string, db *sql.DB) *PostgresDatabase {
 	return &PostgresDatabase{
 		conn:    db,
 		baseURL: baseURL,
 	}
 }
 
-func New(baseURL string, db *sql.DB) handlers.Repository {
-	return handlers.Repository(NewRepository(baseURL, db))
+func NewDatabaseRepository(baseURL string, db *sql.DB) handlers.Repository {
+	return handlers.Repository(DatabaseRepository(baseURL, db))
 }
 
 func (db *PostgresDatabase) AddURL(ctx context.Context, longURL models.LongURL, shortURL models.ShortURL, user models.UserID) error {

@@ -7,11 +7,10 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/storages"
 	_ "github.com/jackc/pgx/stdlib"
 
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/configs"
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/database"
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/filebase"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/handlers"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/helpers/db"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/router"
@@ -36,9 +35,9 @@ func main() {
 			log.Println("Closing don't close")
 		}
 
-		repo = database.New(cfg.DatabaseDSN, conn)
+		repo = storages.NewDatabaseRepository(cfg.DatabaseDSN, conn)
 	} else {
-		repo = filebase.New(ctx, cfg.FileStoragePath, cfg.BaseURL)
+		repo = storages.NewFileRepository(ctx, cfg.FileStoragePath, cfg.BaseURL)
 	}
 
 	handler := router.New(repo, cfg)

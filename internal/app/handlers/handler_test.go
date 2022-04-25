@@ -4,13 +4,13 @@ package handlers
 //	c := configs.New()
 //	db := database.New(new(sql.DB))
 //	h := New(db, c)
-//	s := storage.MockStorage{
-//		Data: make(map[storage.UserID]storage.ShortLinks),
+//	s := storages.MockStorage{
+//		Data: make(map[storages.UserID]storages.ShortLinks),
 //	}
 //
 //	s.GenerateMockData()
 //
-//	h.storage = &s
+//	h.storages = &s
 //
 //	type want struct {
 //		code        int
@@ -54,7 +54,7 @@ package handlers
 //			},
 //		},
 //		{
-//			name: "negative test Get handler empty row in the storage",
+//			name: "negative test Get handler empty row in the storages",
 //			want: want{
 //				code:        http.StatusNotFound,
 //				response:    "<a href=\"https://go.dev\">Temporary Redirect</a>.\n\n",
@@ -98,13 +98,13 @@ package handlers
 //	c := configs.New()
 //	db := database.New(new(sql.DB))
 //	h := New(db, c)
-//	s := storage.MockStorage{
-//		Data: make(map[storage.UserID]storage.ShortLinks),
+//	s := storages.MockStorage{
+//		Data: make(map[storages.UserID]storages.ShortLinks),
 //	}
 //
 //	s.GenerateMockData()
 //
-//	h.storage = &s
+//	h.storages = &s
 //
 //	type want struct {
 //		code        int
@@ -168,13 +168,13 @@ package handlers
 //	c := configs.New()
 //	db := database.New(new(sql.DB))
 //	h := New(db, c)
-//	s := storage.MockStorage{
-//		Data: make(map[storage.UserID]storage.ShortLinks),
+//	s := storages.MockStorage{
+//		Data: make(map[storages.UserID]storages.ShortLinks),
 //	}
 //
 //	s.GenerateMockData()
 //
-//	h.storage = &s
+//	h.storages = &s
 //
 //	type want struct {
 //		code        int
