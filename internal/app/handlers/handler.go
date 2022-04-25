@@ -199,7 +199,7 @@ func (h *Handler) GetLinks(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(urls) == 0 {
-		http.Error(w, errors.New("no content").Error(), http.StatusNoContent)
+		http.Error(w, errors.New("no content").Error(), http.StatusInternalServerError)
 		return
 	}
 
