@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -15,7 +16,6 @@ import (
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/handlers"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/helpers/db"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/router"
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/server"
 )
 
 func main() {
@@ -43,11 +43,17 @@ func main() {
 
 	handler := router.New(repo, cfg)
 
-	serv := server.New(cfg.ServerAddress, cfg.Key, handler)
+	//serv := server.New(cfg.ServerAddress, cfg.Key, handler)
 
 	go func() error {
-		serv.Start()
-
+		httpServer := &http.Server{
+			Addr:    cfg.ServerAddress,
+			Handler: handler,
+		}
+		log.Printf("httpServer starting at: %v", cfg.ServerAddress)
+		if err := httpServer.ListenAndServe(); err != http.ErrServerClosed {
+			return err
+		}
 		return nil
 	}()
 
