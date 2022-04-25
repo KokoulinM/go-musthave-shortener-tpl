@@ -29,18 +29,11 @@ func main() {
 
 	var repo handlers.Repository
 
-	log.Println(cfg)
-
 	if cfg.DatabaseDSN != "" {
 		conn, err := db.Conn("pgx", cfg.DatabaseDSN)
 		if err != nil {
-			log.Println("Closing connect to db")
-			err := conn.Close()
-			if err != nil {
-				log.Println("Closing don't close")
-			}
+			log.Println("Closing don't close")
 		}
-		defer conn.Close()
 
 		repo = database.New(cfg.DatabaseDSN, conn)
 	} else {
@@ -51,8 +44,10 @@ func main() {
 
 	serv := server.New(cfg.ServerAddress, cfg.Key, handler)
 
-	go func() {
+	go func() error {
 		serv.Start()
+
+		return nil
 	}()
 
 	select {

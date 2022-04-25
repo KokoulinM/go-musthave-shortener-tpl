@@ -20,9 +20,9 @@ func New(repo handlers.Repository, cfg configs.Config) *chi.Mux {
 		router.Get("/{id}", h.Get)
 		router.Get("/", h.Get)
 		router.Post("/", h.Save)
+		router.Get("/ping", h.PingDB)
 		router.Post("/api/shorten", h.SaveJSON)
 		router.Get("/api/user/urls", h.GetLinks)
-		router.Get("/ping", h.PingDB)
 	})
 
 	return router
