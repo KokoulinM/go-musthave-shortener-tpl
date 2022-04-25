@@ -103,9 +103,12 @@ func (h *Handler) Save(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "text/plain; charset=utf-8")
 	w.WriteHeader(http.StatusCreated)
 
-	slURL := fmt.Sprintf("%s%s", h.baseURL, shortURL)
+	slURL := fmt.Sprintf("%s/%s", h.baseURL, shortURL)
 
-	w.Write([]byte(slURL))
+	_, err = w.Write([]byte(slURL))
+	if err != nil {
+		http.Error(w, "unexpected error when writing the response body", http.StatusInternalServerError)
+	}
 }
 
 func (h *Handler) SaveJSON(w http.ResponseWriter, r *http.Request) {
@@ -148,9 +151,10 @@ func (h *Handler) SaveJSON(w http.ResponseWriter, r *http.Request) {
 	err = h.repo.AddURL(r.Context(), url.URL, shortURL, userID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
-	slURL := fmt.Sprintf("%s%s", h.baseURL, shortURL)
+	slURL := fmt.Sprintf("%s/%s", h.baseURL, shortURL)
 
 	result := struct {
 		Result string `json:"result"`
@@ -167,7 +171,11 @@ func (h *Handler) SaveJSON(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write(body)
+	_, err = w.Write(body)
+	if err != nil {
+		http.Error(w, "unexpected error when writing the response body", http.StatusInternalServerError)
+		return
+	}
 }
 
 func (h *Handler) GetLinks(w http.ResponseWriter, r *http.Request) {

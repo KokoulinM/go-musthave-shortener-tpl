@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"sync"
@@ -88,7 +89,11 @@ func (repo *Repository) AddURL(ctx context.Context, longURL, shortURL string, us
 	defer repo.mtx.Unlock()
 
 	repo.urls[shortURL] = longURL
-	repo.writeRow(longURL, shortURL, repo.filePath, userID)
+	err := repo.writeRow(longURL, shortURL, repo.filePath, userID)
+	if err != nil {
+		return errors.New("unexpected error when writing row")
+	}
+
 	repo.usersURL[userID] = append(repo.usersURL[userID], shortURL)
 
 	return nil
@@ -116,7 +121,7 @@ func (repo *Repository) GetUserURLs(ctx context.Context, userID models.UserID) (
 
 	for _, v := range shortLinks {
 		result = append(result, handlers.ResponseGetURL{
-			ShortURL:    repo.baseURL + v,
+			ShortURL:    fmt.Sprintf("%s/%s", repo.baseURL, v),
 			OriginalURL: repo.urls[v],
 		})
 	}

@@ -10,8 +10,8 @@ import (
 )
 
 type Config struct {
-	BaseURL         string `env:"BASE_URL" envDefault:"http://localhost:8080/"`
-	ServerAddress   string `env:"SERVER_ADDRESS" envDefault:"localhost:8080"`
+	BaseURL         string `env:"BASE_URL" envDefault:":8080"`
+	ServerAddress   string `env:"SERVER_ADDRESS" envDefault:":8080"`
 	FileStoragePath string `env:"FILE_STORAGE_PATH" envDefault:"storage.json"`
 	DatabaseDSN     string `env:"DATABASE_DSN"`
 	Key             []byte
@@ -45,10 +45,6 @@ func New() Config {
 
 	if checkExists("d") {
 		flag.StringVar(&c.DatabaseDSN, "d", c.DatabaseDSN, "DatabaseDSN")
-	}
-
-	if string(c.BaseURL[len(c.BaseURL)-1]) != "/" {
-		c.BaseURL += "/"
 	}
 
 	flag.Parse()
