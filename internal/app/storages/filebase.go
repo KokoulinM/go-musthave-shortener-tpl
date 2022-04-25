@@ -112,7 +112,7 @@ func (repo *Repository) GetUserURLs(ctx context.Context, userID models.UserID) (
 
 	var result []handlers.ResponseGetURL
 
-	shortLinks, _ := repo.usersURL[userID]
+	shortLinks := repo.usersURL[userID]
 
 	for _, v := range shortLinks {
 		result = append(result, handlers.ResponseGetURL{
