@@ -112,10 +112,7 @@ func (r *Repository) GetUserURLs(ctx context.Context, userID models.UserID) ([]h
 
 	var result []handlers.ResponseGetURL
 
-	shortLinks, ok := r.usersURL[userID]
-	if !ok {
-		return nil, errors.New("url not found")
-	}
+	shortLinks, _ := r.usersURL[userID]
 
 	for _, v := range shortLinks {
 		result = append(result, handlers.ResponseGetURL{
@@ -202,6 +199,10 @@ func (s *Repository) writeRow(longURL, shortURL, filePath, userID string) error 
 	}
 
 	if _, err := p.write.Write(data); err != nil {
+		return err
+	}
+
+	if err := p.write.WriteByte('\n'); err != nil {
 		return err
 	}
 

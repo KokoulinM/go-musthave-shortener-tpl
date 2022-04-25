@@ -186,6 +186,11 @@ func (h *Handler) GetLinks(w http.ResponseWriter, r *http.Request) {
 
 	urls, err := h.repo.GetUserURLs(r.Context(), userID)
 	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if len(urls) == 0 {
 		http.Error(w, errors.New("no content").Error(), http.StatusNoContent)
 		return
 	}
