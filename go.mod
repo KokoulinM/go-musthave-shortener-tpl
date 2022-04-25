@@ -5,6 +5,7 @@ go 1.16
 require (
 	github.com/caarlos0/env/v6 v6.9.1 // indirect
 	github.com/go-chi/chi/v5 v5.0.7 // indirect
+	github.com/gofrs/uuid v4.2.0+incompatible // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/jackc/pgx v3.6.2+incompatible // indirect
 	github.com/pkg/errors v0.9.1 // indirect
