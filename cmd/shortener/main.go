@@ -45,22 +45,17 @@ func main() {
 
 	//serv := server.New(cfg.ServerAddress, cfg.Key, handler)
 
-	go func() error {
-		httpServer := &http.Server{
-			Addr:    cfg.ServerAddress,
-			Handler: handler,
-		}
-		log.Printf("httpServer starting at: %v", cfg.ServerAddress)
-		if err := httpServer.ListenAndServe(); err != http.ErrServerClosed {
-			return err
-		}
-		return nil
-	}()
-
-	select {
-	case <-interrupt:
-		break
-	case <-ctx.Done():
-		break
+	httpServer := &http.Server{
+		Addr:    cfg.ServerAddress,
+		Handler: handler,
 	}
+
+	log.Fatal(httpServer.ListenAndServe())
+
+	//select {
+	//case <-interrupt:
+	//	break
+	//case <-ctx.Done():
+	//	break
+	//}
 }
