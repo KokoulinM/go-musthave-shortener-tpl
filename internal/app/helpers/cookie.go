@@ -6,9 +6,8 @@ import (
 
 func CreateCookie(name, value string) *http.Cookie {
 	return &http.Cookie{
-		Name:   name,
-		Value:  value,
-		Path:   "/",
-		Secure: true,
+		Name:  name,
+		Value: value,
+		Path:  "/",
 	}
 }
