@@ -30,6 +30,4 @@ func (s *server) Start() {
 	}
 
 	log.Fatal(http.ListenAndServe(srv.Addr, srv.Handler))
-
-	return
 }
