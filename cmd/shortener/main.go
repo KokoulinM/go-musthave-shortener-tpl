@@ -45,10 +45,8 @@ func main() {
 
 	serv := server.New(cfg.ServerAddress, cfg.Key, handler)
 
-	go func() error {
+	go func() {
 		serv.Start()
-
-		return nil
 	}()
 
 	select {

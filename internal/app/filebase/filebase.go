@@ -145,8 +145,8 @@ func NewProducer(filename string) (*producer, error) {
 	}, nil
 }
 
-func NewConsumer(filename string) (*consumer, error) {
-	file, err := os.OpenFile(filename, os.O_CREATE|os.O_RDONLY, 0777)
+func NewConsumer(filePath string) (*consumer, error) {
+	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_RDONLY, 0777)
 
 	if err != nil {
 		return nil, err

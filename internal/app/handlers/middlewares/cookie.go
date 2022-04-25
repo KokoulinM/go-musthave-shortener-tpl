@@ -2,7 +2,6 @@ package middlewares
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/helpers"
@@ -22,7 +21,6 @@ func CookieMiddleware(key []byte) func(next http.Handler) http.Handler {
 			cookieUserID, _ := r.Cookie(CookieUserIDName)
 			encryptor, err := encryptor.New(key)
 
-			fmt.Println(encryptor)
 			if err != nil {
 				return
 			}
