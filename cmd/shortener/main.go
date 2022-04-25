@@ -7,6 +7,8 @@ import (
 	"os/signal"
 	"syscall"
 
+	_ "github.com/jackc/pgx/stdlib"
+
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/configs"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/database"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/filebase"
@@ -14,7 +16,6 @@ import (
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/helpers/db"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/router"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/server"
-	_ "github.com/jackc/pgx/stdlib"
 )
 
 func main() {

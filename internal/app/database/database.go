@@ -15,11 +15,10 @@ type PostgresDatabase struct {
 }
 
 func NewRepository(baseURL string, db *sql.DB) *PostgresDatabase {
-	result := &PostgresDatabase{
+	return &PostgresDatabase{
 		conn:    db,
 		baseURL: baseURL,
 	}
-	return result
 }
 
 func New(baseURL string, db *sql.DB) handlers.Repository {

@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
@@ -17,9 +16,6 @@ type server struct {
 }
 
 func New(addr string, key []byte, handler *chi.Mux) *server {
-	fmt.Println("server started")
-	defer fmt.Println("server finished")
-
 	return &server{
 		addr:    addr,
 		key:     key,
@@ -34,4 +30,6 @@ func (s *server) Start() {
 	}
 
 	log.Fatal(http.ListenAndServe(srv.Addr, srv.Handler))
+
+	return
 }
