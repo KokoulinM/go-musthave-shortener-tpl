@@ -103,7 +103,7 @@ func (h *Handler) Save(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "text/plain; charset=utf-8")
 	w.WriteHeader(http.StatusCreated)
 
-	slURL := fmt.Sprintf("%s/%s", h.baseURL, shortURL)
+	slURL := fmt.Sprintf("%s%s", h.baseURL, shortURL)
 
 	w.Write([]byte(slURL))
 }
