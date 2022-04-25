@@ -119,12 +119,18 @@ func (repo *Repository) GetUserURLs(ctx context.Context, userID models.UserID) (
 
 	shortLinks := repo.usersURL[userID]
 
+	log.Println("userID: ", userID)
+
+	log.Println("repo.usersURL[userID]: ", shortLinks)
+
 	for _, v := range shortLinks {
 		result = append(result, handlers.ResponseGetURL{
 			ShortURL:    fmt.Sprintf("%s/%s", repo.baseURL, v),
 			OriginalURL: repo.urls[v],
 		})
 	}
+
+	log.Println("result: ", result)
 
 	return result, nil
 }
