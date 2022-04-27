@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -32,13 +32,13 @@ func main() {
 	if cfg.DatabaseDSN != "" {
 		conn, err := database.Conn("pgx", cfg.DatabaseDSN)
 		if err != nil {
-			fmt.Println(err.Error())
+			log.Printf("Unable to connect to the database: %s", err.Error())
 		}
 
 		err = database.SetUpDataBase(conn, ctx)
 
 		if err != nil {
-			fmt.Println(err.Error())
+			log.Printf("Unable to create database struct: %s", err.Error())
 		}
 
 		repo = storages.NewDatabaseRepository(cfg.DatabaseDSN, conn)
