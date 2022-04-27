@@ -33,7 +33,7 @@ type URL struct {
 
 type ResponseGetURL struct {
 	ShortURL    string `json:"short_url"`
-	OriginalURL string `json:"origin_url"`
+	OriginalURL string `json:"original_url"`
 }
 
 func New(repo Repository, baseURL string) *Handler {
