@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"log"
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -32,13 +32,13 @@ func main() {
 	if cfg.DatabaseDSN != "" {
 		conn, err := database.Conn("pgx", cfg.DatabaseDSN)
 		if err != nil {
-			log.Fatal(err.Error())
+			fmt.Println(err.Error())
 		}
 
 		err = database.SetUpDataBase(conn, ctx)
 
 		if err != nil {
-			log.Fatal(err.Error())
+			fmt.Println(err.Error())
 		}
 
 		repo = storages.NewDatabaseRepository(cfg.DatabaseDSN, conn)
