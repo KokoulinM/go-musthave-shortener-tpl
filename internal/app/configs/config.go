@@ -4,7 +4,6 @@ import (
 	"flag"
 	"log"
 
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/helpers"
 	"github.com/caarlos0/env/v6"
 
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/helpers"
@@ -14,7 +13,7 @@ type Config struct {
 	BaseURL         string `env:"BASE_URL" envDefault:"http://localhost:8080"`
 	ServerAddress   string `env:"SERVER_ADDRESS" envDefault:":8080"`
 	FileStoragePath string `env:"FILE_STORAGE_PATH" envDefault:"storage.json"`
-	DatabaseDSN     string `env:"DATABASE_DSN"`
+	DatabaseDSN     string `env:"DATABASE_DSN" envDefault:"user=postgres password=postgres"`
 	Key             []byte
 }
 

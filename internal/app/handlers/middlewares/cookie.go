@@ -2,7 +2,6 @@ package middlewares
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
 	"github.com/gofrs/uuid"
@@ -22,8 +21,6 @@ func CookieMiddleware(key []byte) func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			cookieUserID, _ := r.Cookie(CookieUserIDName)
 			encryptor, err := encryptor.New(key)
-
-			fmt.Println("cookieUserID.Value: ", cookieUserID.Value)
 
 			if err != nil {
 				return

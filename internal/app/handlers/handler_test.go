@@ -2,8 +2,8 @@ package handlers
 
 //func TestGetHandler(t *testing.T) {
 //	c := configs.New()
-//	db := database.New(new(sql.DB))
-//	h := New(db, c)
+//	database := database.New(new(sql.DB))
+//	h := New(database, c)
 //	s := storages.MockStorage{
 //		Data: make(map[storages.UserID]storages.ShortLinks),
 //	}
@@ -96,8 +96,8 @@ package handlers
 //
 //func TestSaveHandler(t *testing.T) {
 //	c := configs.New()
-//	db := database.New(new(sql.DB))
-//	h := New(db, c)
+//	database := database.New(new(sql.DB))
+//	h := New(database, c)
 //	s := storages.MockStorage{
 //		Data: make(map[storages.UserID]storages.ShortLinks),
 //	}
@@ -166,8 +166,8 @@ package handlers
 //
 //func TestHandlerSaveJSON(t *testing.T) {
 //	c := configs.New()
-//	db := database.New(new(sql.DB))
-//	h := New(db, c)
+//	database := database.New(new(sql.DB))
+//	h := New(database, c)
 //	s := storages.MockStorage{
 //		Data: make(map[storages.UserID]storages.ShortLinks),
 //	}
