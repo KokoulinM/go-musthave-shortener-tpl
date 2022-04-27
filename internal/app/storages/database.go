@@ -54,7 +54,7 @@ func (db *PostgresDatabase) GetURL(ctx context.Context, shortURL models.ShortURL
 
 	err := row.Scan(&result.OriginalURL, &result.IsDeleted)
 	if err != nil {
-		errors.New(err.Error())
+		return "", err
 	}
 
 	if result.OriginalURL == "" {

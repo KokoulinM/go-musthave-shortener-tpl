@@ -32,10 +32,14 @@ func main() {
 	if cfg.DatabaseDSN != "" {
 		conn, err := database.Conn("pgx", cfg.DatabaseDSN)
 		if err != nil {
-			log.Println("Closing don't close")
+			log.Fatal(err.Error())
 		}
 
-		database.SetUpDataBase(conn, ctx)
+		err = database.SetUpDataBase(conn, ctx)
+
+		if err != nil {
+			log.Fatal(err.Error())
+		}
 
 		repo = storages.NewDatabaseRepository(cfg.DatabaseDSN, conn)
 	} else {

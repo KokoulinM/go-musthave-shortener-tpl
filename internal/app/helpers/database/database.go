@@ -3,7 +3,6 @@ package database
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"fmt"
 	"log"
 )
@@ -32,7 +31,7 @@ func SetUpDataBase(db *sql.DB, ctx context.Context) error {
 	query := db.QueryRowContext(ctx, "SELECT 'exists' FROM pg_extension WHERE extname='uuid-ossp';")
 	err := query.Scan(&extention)
 	if err != nil {
-		errors.New(err.Error())
+		return err
 	}
 
 	if extention != "exists" {
