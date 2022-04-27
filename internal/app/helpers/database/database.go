@@ -33,7 +33,7 @@ func SetUpDataBase(db *sql.DB, ctx context.Context) error {
 
 	err := query.Scan(&extention)
 	if err != nil {
-		return err
+		log.Printf("Unable to scan: %s", err)
 	}
 
 	if extention != "exists" {
