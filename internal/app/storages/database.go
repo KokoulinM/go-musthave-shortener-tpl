@@ -17,8 +17,8 @@ type PostgresDatabase struct {
 }
 
 type GetURLData struct {
-	OriginalURL string
-	IsDeleted   bool
+	OriginlURL string
+	IsDeleted  bool
 }
 
 func DatabaseRepository(baseURL string, db *sql.DB) *PostgresDatabase {
@@ -33,7 +33,7 @@ func NewDatabaseRepository(baseURL string, db *sql.DB) handlers.Repository {
 }
 
 func (db *PostgresDatabase) AddURL(ctx context.Context, longURL models.LongURL, shortURL models.ShortURL, user models.UserID) error {
-	sqlAddRow := `INSERT INTO urls (user_id, original_url, short_url)
+	sqlAddRow := `INSERT INTO urls (user_id, origin_url, short_url)
 				  VALUES ($1, $2, $3)`
 
 	_, err := db.conn.ExecContext(ctx, sqlAddRow, user, longURL, shortURL)
@@ -46,31 +46,31 @@ func (db *PostgresDatabase) AddURL(ctx context.Context, longURL models.LongURL, 
 }
 
 func (db *PostgresDatabase) GetURL(ctx context.Context, shortURL models.ShortURL) (models.ShortURL, error) {
-	sqlGetURLRow := `SELECT original_url, is_deleted FROM urls WHERE short_url=$1 LIMIT 1`
+	sqlGetURLRow := `SELECT origin_url, is_deleted FROM urls WHERE short_url=$1 LIMIT 1`
 
 	row := db.conn.QueryRowContext(ctx, sqlGetURLRow, shortURL)
 
 	result := GetURLData{}
 
-	err := row.Scan(&result.OriginalURL, &result.IsDeleted)
+	err := row.Scan(&result.OriginlURL, &result.IsDeleted)
 	if err != nil {
 		return "", err
 	}
 
-	if result.OriginalURL == "" {
+	if result.OriginlURL == "" {
 		return "", errors.New("not found")
 	}
 	if result.IsDeleted {
 		return "", errors.New("deleted")
 	}
 
-	return result.OriginalURL, nil
+	return result.OriginlURL, nil
 }
 
 func (db *PostgresDatabase) GetUserURLs(ctx context.Context, user models.UserID) ([]handlers.ResponseGetURL, error) {
 	var result []handlers.ResponseGetURL
 
-	sqlGetUserURL := `SELECT original_url, short_url FROM urls WHERE user_id=$1 AND is_deleted=false;`
+	sqlGetUserURL := `SELECT origin_url, short_url FROM urls WHERE user_id=$1 AND is_deleted=false;`
 	rows, err := db.conn.QueryContext(ctx, sqlGetUserURL, user)
 	if err != nil {
 		return result, err
@@ -82,7 +82,7 @@ func (db *PostgresDatabase) GetUserURLs(ctx context.Context, user models.UserID)
 
 	for rows.Next() {
 		var u handlers.ResponseGetURL
-		err = rows.Scan(&u.OriginalURL, &u.ShortURL)
+		err = rows.Scan(&u.OriginlURL, &u.ShortURL)
 		if err != nil {
 			return result, err
 		}
