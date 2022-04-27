@@ -17,9 +17,9 @@ func New(repo handlers.Repository, cfg configs.Config) *chi.Mux {
 	router.Use(middleware.Recoverer)
 
 	router.Route("/", func(r chi.Router) {
-		router.Get("/{id}", h.Get)
 		router.Get("/", h.Get)
 		router.Post("/", h.Save)
+		router.Get("/{id}", h.Get)
 		router.Get("/ping", h.PingDB)
 		router.Post("/api/shorten", h.SaveJSON)
 		router.Get("/api/user/urls", h.GetLinks)

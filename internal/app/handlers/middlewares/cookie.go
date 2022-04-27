@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/gofrs/uuid"
+
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/helpers"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/helpers/encryptor"
-	"github.com/google/uuid"
 )
 
 const CookieUserIDName = "user_id"
@@ -36,12 +37,17 @@ func CookieMiddleware(key []byte) func(next http.Handler) http.Handler {
 					return
 				}
 			}
-			userID := uuid.New().String()
-			encoded := encryptor.Encode([]byte(userID))
+
+			userID, err := uuid.NewV4()
+			if err != nil {
+				return
+			}
+
+			encoded := encryptor.Encode(userID.Bytes())
 			cookie := helpers.CreateCookie(CookieUserIDName, encoded)
 
 			http.SetCookie(w, cookie)
-			next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), UserIDCtxName, userID)))
+			next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), UserIDCtxName, userID.String())))
 		})
 	}
 }
