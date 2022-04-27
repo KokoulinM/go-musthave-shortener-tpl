@@ -17,8 +17,8 @@ type PostgresDatabase struct {
 }
 
 type GetURLData struct {
-	OriginlURL string
-	IsDeleted  bool
+	OriginalURL string
+	IsDeleted   bool
 }
 
 func DatabaseRepository(baseURL string, db *sql.DB) *PostgresDatabase {
@@ -52,19 +52,19 @@ func (db *PostgresDatabase) GetURL(ctx context.Context, shortURL models.ShortURL
 
 	result := GetURLData{}
 
-	err := row.Scan(&result.OriginlURL, &result.IsDeleted)
+	err := row.Scan(&result.OriginalURL, &result.IsDeleted)
 	if err != nil {
 		return "", err
 	}
 
-	if result.OriginlURL == "" {
+	if result.OriginalURL == "" {
 		return "", errors.New("not found")
 	}
 	if result.IsDeleted {
 		return "", errors.New("deleted")
 	}
 
-	return result.OriginlURL, nil
+	return result.OriginalURL, nil
 }
 
 func (db *PostgresDatabase) GetUserURLs(ctx context.Context, user models.UserID) ([]handlers.ResponseGetURL, error) {
@@ -82,7 +82,7 @@ func (db *PostgresDatabase) GetUserURLs(ctx context.Context, user models.UserID)
 
 	for rows.Next() {
 		var u handlers.ResponseGetURL
-		err = rows.Scan(&u.OriginlURL, &u.ShortURL)
+		err = rows.Scan(&u.OriginalURL, &u.ShortURL)
 		if err != nil {
 			return result, err
 		}
