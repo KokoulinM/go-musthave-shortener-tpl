@@ -52,7 +52,10 @@ func (db *PostgresDatabase) GetURL(ctx context.Context, shortURL models.ShortURL
 
 	result := GetURLData{}
 
-	row.Scan(&result.OriginalURL, &result.IsDeleted)
+	err := row.Scan(&result.OriginalURL, &result.IsDeleted)
+	if err != nil {
+		errors.New(err.Error())
+	}
 
 	if result.OriginalURL == "" {
 		return "", errors.New("not found")
