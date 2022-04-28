@@ -116,13 +116,13 @@ func (db *PostgresDatabase) AddMultipleURLs(ctx context.Context, urls []handlers
 }
 
 func (db *PostgresDatabase) GetURL(ctx context.Context, shortURL models.ShortURL) (models.ShortURL, error) {
-	sqlGetURLRow := `SELECT origin_url, is_deleted FROM urls WHERE short_url=$1 LIMIT 1`
+	sqlGetURLRow := `SELECT origin_url FROM urls WHERE short_url=$1 LIMIT 1`
 
 	row := db.conn.QueryRowContext(ctx, sqlGetURLRow, shortURL)
 
 	result := GetURLData{}
 
-	err := row.Scan(&result.OriginalURL, &result.IsDeleted)
+	err := row.Scan(&result.OriginalURL)
 	if err != nil {
 		return "", err
 	}
@@ -140,7 +140,7 @@ func (db *PostgresDatabase) GetURL(ctx context.Context, shortURL models.ShortURL
 func (db *PostgresDatabase) GetUserURLs(ctx context.Context, user models.UserID) ([]handlers.ResponseGetURL, error) {
 	var result []handlers.ResponseGetURL
 
-	sqlGetUserURL := `SELECT origin_url, short_url FROM urls WHERE user_id=$1 AND is_deleted=false;`
+	sqlGetUserURL := `SELECT origin_url, short_url FROM urls WHERE user_id=$1;`
 	rows, err := db.conn.QueryContext(ctx, sqlGetUserURL, user)
 	if err != nil {
 		return result, err
