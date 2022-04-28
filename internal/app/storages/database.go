@@ -67,17 +67,13 @@ func (db *PostgresDatabase) AddMultipleURLs(ctx context.Context, urls []handlers
 		shortURL := models.ShortURL(helpers.RandomString(10))
 
 		if _, err = stmt.ExecContext(ctx, user, u.OriginalURL, shortURL); err != nil {
-			return nil, err
+			fmt.Printf("SHORT_URL: %s уже существует ", shortURL)
 		}
 
 		result = append(result, handlers.ResponseGetURLs{
 			CorrelationID: u.CorrelationID,
 			ShortURL:      db.baseURL + shortURL,
 		})
-	}
-
-	if err != nil {
-		return nil, err
 	}
 
 	tx.Commit()
