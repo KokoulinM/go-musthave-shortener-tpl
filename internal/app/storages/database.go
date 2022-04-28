@@ -71,7 +71,7 @@ func (db *PostgresDatabase) AddMultipleURLs(ctx context.Context, urls []handlers
 		}
 		result = append(result, handlers.ResponseGetURLs{
 			CorrelationID: u.CorrelationID,
-			ShortURL:      db.baseURL + shortURL,
+			ShortURL:      fmt.Sprintf("%s/%s", db.baseURL, shortURL),
 		})
 	}
 
