@@ -283,7 +283,7 @@ func (h *Handler) CreateBatch(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusCreated)
 
-	w.Write(body)
+	_, err = w.Write(body)
 	if err != nil {
 		http.Error(w, "unexpected error when writing the response body", http.StatusInternalServerError)
 		return
