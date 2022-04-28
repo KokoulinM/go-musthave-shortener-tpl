@@ -230,14 +230,14 @@ func (h *Handler) GetLinks(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) CreateBatch(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
-
-	var data []RequestGetURLs
-
 	if r.Method != http.MethodPost {
 		http.Error(w, "only POST requests are allowed", http.StatusMethodNotAllowed)
 		return
 	}
+
+	defer r.Body.Close()
+
+	var data []RequestGetURLs
 
 	userIDCtx := r.Context().Value(middlewares.UserIDCtxName)
 
@@ -271,7 +271,7 @@ func (h *Handler) CreateBatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusCreated)
 
 	w.Write(body)
 	if err != nil {
