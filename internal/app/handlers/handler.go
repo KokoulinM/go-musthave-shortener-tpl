@@ -266,6 +266,7 @@ func (h *Handler) CreateBatch(w http.ResponseWriter, r *http.Request) {
 
 	urls, err := h.repo.AddMultipleURLs(r.Context(), data, userID)
 	if err != nil {
+		log.Println("err.Error(): ", err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
