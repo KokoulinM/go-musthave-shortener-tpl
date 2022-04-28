@@ -56,7 +56,7 @@ func (db *PostgresDatabase) AddMultipleURLs(ctx context.Context, urls []handlers
 
 	defer tx.Rollback()
 
-	stmt, err := db.conn.PrepareContext(ctx, "INSERT INTO urls (user_id, origin_url, short_url) VALUES ($1, $2, $3)")
+	stmt, err := tx.PrepareContext(ctx, `INSERT INTO urls (user_id, origin_url, short_url) VALUES ($1, $2, $3)`)
 	if err != nil {
 		return nil, err
 	}
