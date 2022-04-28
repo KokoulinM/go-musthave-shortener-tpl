@@ -51,17 +51,23 @@ func (db *PostgresDatabase) AddMultipleURLs(ctx context.Context, urls []handlers
 
 	tx, err := db.conn.Begin()
 	if err != nil {
-		return result, err
+		return nil, err
 	}
+
 	defer tx.Rollback()
 
 	stmt, err := db.conn.PrepareContext(ctx, "INSERT INTO urls (user_id, origin_url, short_url) VALUES ($1, $2, $3)")
+	if err != nil {
+		return nil, err
+	}
+
+	defer stmt.Close()
 
 	for _, u := range urls {
 		shortURL := models.ShortURL(helpers.RandomString(10))
 
 		if _, err = stmt.ExecContext(ctx, user, u.OriginalURL, shortURL); err != nil {
-			return result, err
+			return nil, err
 		}
 
 		result = append(result, handlers.ResponseGetURLs{
@@ -73,6 +79,7 @@ func (db *PostgresDatabase) AddMultipleURLs(ctx context.Context, urls []handlers
 	if err != nil {
 		return nil, err
 	}
+
 	tx.Commit()
 
 	return result, nil
