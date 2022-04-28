@@ -281,6 +281,8 @@ func (h *Handler) CreateBatch(w http.ResponseWriter, r *http.Request) {
 
 	log.Println("body: ", body)
 
+	w.Header().Add("Content-Type", "application/json; charset=utf-8")
+
 	w.WriteHeader(http.StatusCreated)
 
 	_, err = w.Write(body)
