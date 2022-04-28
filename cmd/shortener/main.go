@@ -41,7 +41,7 @@ func main() {
 			log.Printf("Unable to create database struct: %s", err.Error())
 		}
 
-		repo = storages.NewDatabaseRepository(cfg.DatabaseDSN, conn)
+		repo = storages.NewDatabaseRepository(cfg.BaseURL, conn)
 	} else {
 		repo = storages.NewFileRepository(ctx, cfg.FileStoragePath, cfg.BaseURL)
 	}

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -20,6 +21,7 @@ type Repository interface {
 	GetURL(ctx context.Context, shortURL models.ShortURL) (models.ShortURL, error)
 	GetUserURLs(ctx context.Context, user models.UserID) ([]ResponseGetURL, error)
 	Ping(ctx context.Context) error
+	AddMultipleURLs(ctx context.Context, urls []RequestGetURLs, user models.UserID) ([]ResponseGetURLs, error)
 }
 
 type Handler struct {
@@ -34,6 +36,16 @@ type URL struct {
 type ResponseGetURL struct {
 	ShortURL    string `json:"short_url"`
 	OriginalURL string `json:"original_url"`
+}
+
+type RequestGetURLs struct {
+	CorrelationID string `json:"correlation_id"`
+	OriginalURL   string `json:"original_url"`
+}
+
+type ResponseGetURLs struct {
+	CorrelationID string `json:"correlation_id"`
+	ShortURL      string `json:"short_url"`
 }
 
 func New(repo Repository, baseURL string) *Handler {
@@ -215,6 +227,53 @@ func (h *Handler) GetLinks(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+}
+
+func (h *Handler) CreateBatch(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+
+	var data []RequestGetURLs
+
+	if r.Method != http.MethodPost {
+		http.Error(w, "only POST requests are allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	userIDCtx := r.Context().Value(middlewares.UserIDCtxName)
+
+	userID := "default"
+
+	if userIDCtx != nil {
+		userID = userIDCtx.(string)
+	}
+
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = json.Unmarshal(body, &data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	urls, err := h.repo.AddMultipleURLs(r.Context(), data, userID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	body, err = json.Marshal(urls)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+
+	w.Write(body)
 }
 
 func (h *Handler) PingDB(w http.ResponseWriter, r *http.Request) {
