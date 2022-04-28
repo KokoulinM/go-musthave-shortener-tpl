@@ -133,7 +133,7 @@ func (repo *Repository) Ping(ctx context.Context) error {
 	return errors.New("not supported with filebase repository")
 }
 
-func (db *Repository) AddMultipleURLs(ctx context.Context, urls []handlers.RequestGetURLs, user models.UserID) ([]handlers.ResponseGetURLs, error) {
+func (repo *Repository) AddMultipleURLs(ctx context.Context, urls []handlers.RequestGetURLs, user models.UserID) ([]handlers.ResponseGetURLs, error) {
 	return nil, nil
 }
 
