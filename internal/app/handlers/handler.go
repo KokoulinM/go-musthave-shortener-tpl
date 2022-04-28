@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -253,11 +254,15 @@ func (h *Handler) CreateBatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Println("body: ", body)
+
 	err = json.Unmarshal(body, &data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	log.Println("data: ", data)
 
 	urls, err := h.repo.AddMultipleURLs(r.Context(), data, userID)
 	if err != nil {
@@ -265,11 +270,15 @@ func (h *Handler) CreateBatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Println("urls: ", urls)
+
 	body, err = json.Marshal(urls)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	log.Println("body: ", body)
 
 	w.WriteHeader(http.StatusCreated)
 
