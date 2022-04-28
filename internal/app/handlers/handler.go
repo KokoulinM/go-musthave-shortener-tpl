@@ -10,10 +10,10 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/shortener"
 	"github.com/go-chi/chi/v5"
 
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/handlers/middlewares"
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/helpers"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/models"
 )
 
@@ -108,7 +108,7 @@ func (h *Handler) Save(w http.ResponseWriter, r *http.Request) {
 	}
 
 	longURL := models.LongURL(body)
-	shortURL := models.ShortURL(helpers.RandomString(10))
+	shortURL := shortener.ShorterURL(longURL)
 
 	err = h.repo.AddURL(r.Context(), longURL, shortURL, userID)
 	if err != nil {
@@ -161,7 +161,7 @@ func (h *Handler) SaveJSON(w http.ResponseWriter, r *http.Request) {
 		userID = userIDCtx.(string)
 	}
 
-	shortURL := models.ShortURL(helpers.RandomString(10))
+	shortURL := shortener.ShorterURL(url.URL)
 
 	err = h.repo.AddURL(r.Context(), url.URL, shortURL, userID)
 	if err != nil {
