@@ -5,7 +5,9 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"os"
+
+	"github.com/jackc/pgerrcode"
+	"github.com/jackc/pgx"
 
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/handlers"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/models"
@@ -39,8 +41,8 @@ func (db *PostgresDatabase) AddURL(ctx context.Context, longURL models.LongURL, 
 
 	_, err := db.conn.ExecContext(ctx, sqlAddRow, user, longURL, shortURL)
 
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to add an entry to the table: %v\n", err)
+	if err.(pgx.PgError).Code == pgerrcode.UniqueViolation {
+		return handlers.NewErrorWithDB(err, "UniqConstraint")
 	}
 
 	return err
@@ -80,39 +82,6 @@ func (db *PostgresDatabase) AddMultipleURLs(ctx context.Context, urls []handlers
 	}
 	tx.Commit()
 	return result, nil
-
-	//var result []handlers.ResponseGetURLs
-	//
-	//tx, err := db.conn.Begin()
-	//if err != nil {
-	//	return nil, err
-	//}
-	//
-	//defer tx.Rollback()
-	//
-	//stmt, err := tx.PrepareContext(ctx, `INSERT INTO urls (user_id, origin_url, short_url) VALUES ($1, $2, $3)`)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//
-	//defer stmt.Close()
-	//
-	//for _, u := range urls {
-	//	shortURL := models.ShortURL(helpers.RandomString(10))
-	//
-	//	if _, err = stmt.ExecContext(ctx, user, u.OriginalURL, shortURL); err != nil {
-	//		return nil, err
-	//	}
-	//
-	//	result = append(result, handlers.ResponseGetURLs{
-	//		CorrelationID: u.CorrelationID,
-	//		ShortURL:      fmt.Sprintf("%s/%s", db.baseURL, shortURL),
-	//	})
-	//}
-	//
-	//tx.Commit()
-	//
-	//return result, nil
 }
 
 func (db *PostgresDatabase) GetURL(ctx context.Context, shortURL models.ShortURL) (models.ShortURL, error) {

@@ -30,7 +30,7 @@ func SetUpDataBase(db *sql.DB, ctx context.Context) error {
 
 	sqlCreateDB := `CREATE TABLE IF NOT EXISTS urls (
 								id serial PRIMARY KEY,
-								user_id VARCHAR NOT NULL, 	
+								user_id VARCHAR NOT NULL UNIQUE, 	
 								origin_url VARCHAR NOT NULL, 
 								short_url VARCHAR NOT NULL
 					);`

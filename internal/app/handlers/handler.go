@@ -49,6 +49,26 @@ type ResponseGetURLs struct {
 	ShortURL      string `json:"short_url"`
 }
 
+type ErrorWithDB struct {
+	Err   error
+	Title string
+}
+
+func (err *ErrorWithDB) Error() string {
+	return fmt.Sprintf("%v", err.Err)
+}
+
+func (err *ErrorWithDB) Unwrap() error {
+	return err.Err
+}
+
+func NewErrorWithDB(err error, title string) error {
+	return &ErrorWithDB{
+		Err:   err,
+		Title: title,
+	}
+}
+
 func New(repo Repository, baseURL string) *Handler {
 	return &Handler{
 		repo:    repo,
@@ -112,6 +132,20 @@ func (h *Handler) Save(w http.ResponseWriter, r *http.Request) {
 
 	err = h.repo.AddURL(r.Context(), longURL, shortURL, userID)
 	if err != nil {
+		var dbErr *ErrorWithDB
+
+		if errors.As(err, &dbErr) && dbErr.Title == "UniqConstraint" {
+			w.Header().Add("Content-Type", "text/plain; charset=utf-8")
+
+			w.WriteHeader(http.StatusConflict)
+
+			slURL := fmt.Sprintf("%s/%s", h.baseURL, shortURL)
+
+			_, err = w.Write([]byte(slURL))
+
+			return
+		}
+
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
