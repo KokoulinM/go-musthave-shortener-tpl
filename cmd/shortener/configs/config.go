@@ -24,9 +24,14 @@ func checkExists(f string) bool {
 func New() Config {
 	var c Config
 
-	c.Key, _ = helpers.GenerateRandom(16)
+	random, err := helpers.GenerateRandom(16)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	err := env.Parse(&c)
+	c.Key = random
+
+	err = env.Parse(&c)
 	if err != nil {
 		log.Fatal(err)
 	}
