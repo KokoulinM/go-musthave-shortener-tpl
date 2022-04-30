@@ -61,25 +61,22 @@ func (db *PostgresDatabase) AddMultipleURLs(ctx context.Context, urls []handlers
 		return nil, err
 	}
 
-	defer func() {
-		err := tx.Rollback()
-		if err != nil {
-			log.Fatal(err)
-		}
-	}()
-
 	stmt, err := tx.PrepareContext(ctx, `INSERT INTO urls (user_id, origin_url, short_url) VALUES ($1, $2, $3)`)
 
 	if err != nil {
 		return nil, err
 	}
 
-	defer func() {
-		err := stmt.Close()
+	defer func(tx *sql.Tx) {
+		_ = tx.Rollback()
+	}(tx)
+
+	defer func(stmt *sql.Stmt) {
+		err = stmt.Close()
 		if err != nil {
 			log.Fatal(err)
 		}
-	}()
+	}(stmt)
 
 	for _, u := range urls {
 		shortURL := shortener.ShorterURL(u.OriginalURL)
