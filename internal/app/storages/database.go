@@ -98,7 +98,12 @@ func (db *PostgresDatabase) AddMultipleURLs(ctx context.Context, urls []handlers
 	if err != nil {
 		return nil, err
 	}
-	tx.Commit()
+
+	err = tx.Commit()
+	if err != nil {
+		return nil, err
+	}
+
 	return result, nil
 }
 
