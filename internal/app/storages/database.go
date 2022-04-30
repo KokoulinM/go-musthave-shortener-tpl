@@ -6,11 +6,12 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/jackc/pgerrcode"
+	"github.com/lib/pq"
+
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/handlers"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/models"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/shortener"
-	"github.com/jackc/pgerrcode"
-	"github.com/lib/pq"
 )
 
 type PostgresDatabase struct {

@@ -7,11 +7,11 @@ import (
 	"os/signal"
 	"syscall"
 
+	_ "github.com/lib/pq"
+
 	"github.com/KokoulinM/go-musthave-shortener-tpl/cmd/shortener/configs"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/cmd/shortener/database"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/cmd/shortener/router"
-	_ "github.com/lib/pq"
-
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/handlers"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/server"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/storages"
