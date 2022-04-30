@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"log"
 
 	"github.com/jackc/pgerrcode"
 	"github.com/lib/pq"
@@ -61,11 +60,13 @@ func (db *PostgresDatabase) AddMultipleURLs(ctx context.Context, urls []handlers
 		return nil, err
 	}
 
-	defer func() {
+	defer func() error {
 		err := tx.Rollback()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
+
+		return nil
 	}()
 
 	stmt, err := tx.PrepareContext(ctx, `INSERT INTO urls (user_id, origin_url, short_url) VALUES ($1, $2, $3)`)
@@ -74,11 +75,13 @@ func (db *PostgresDatabase) AddMultipleURLs(ctx context.Context, urls []handlers
 		return nil, err
 	}
 
-	defer func() {
+	defer func() error {
 		err := stmt.Close()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
+
+		return nil
 	}()
 
 	for _, u := range urls {
