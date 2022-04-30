@@ -1,4 +1,4 @@
-package handlers
+package middlewares
 
 import (
 	"compress/gzip"
@@ -13,7 +13,7 @@ type gzipWriter struct {
 	Writer io.Writer
 }
 
-func GzipHandle(next http.Handler) http.Handler {
+func GzipMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.Contains(r.Header.Get("Content-Encoding"), "gzip") {
 			reader, err := gzip.NewReader(r.Body)

@@ -4,39 +4,30 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/configs"
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/handlers"
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/handlers/middlewares"
 )
 
 type server struct {
-	addr   string
-	config configs.Config
+	addr    string
+	key     []byte
+	handler *chi.Mux
 }
 
-func New(addr string, config configs.Config) *server {
+func New(addr string, key []byte, handler *chi.Mux) *server {
 	return &server{
-		addr:   addr,
-		config: config,
+		addr:    addr,
+		key:     key,
+		handler: handler,
 	}
 }
 
 func (s *server) Start() {
-	h := handlers.New(s.config)
+	srv := &http.Server{
+		Addr:    s.addr,
+		Handler: middlewares.Conveyor(s.handler, middlewares.GzipMiddleware, middlewares.CookieMiddleware(s.key)),
+	}
 
-	router := chi.NewRouter()
-
-	router.Use(middleware.Logger)
-	router.Use(middleware.Recoverer)
-
-	router.Route("/", func(r chi.Router) {
-		router.Get("/{id}", h.Get)
-		router.Get("/", h.Get)
-		router.Post("/", h.Save)
-		router.Post("/api/shorten", h.SaveJSON)
-	})
-
-	log.Fatal(http.ListenAndServe(s.addr, handlers.GzipHandle(router)))
+	log.Fatal(http.ListenAndServe(srv.Addr, srv.Handler))
 }

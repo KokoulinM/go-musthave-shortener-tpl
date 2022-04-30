@@ -5,12 +5,16 @@ import (
 	"log"
 
 	"github.com/caarlos0/env/v6"
+
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/helpers"
 )
 
 type Config struct {
 	BaseURL         string `env:"BASE_URL" envDefault:"http://localhost:8080"`
 	ServerAddress   string `env:"SERVER_ADDRESS" envDefault:":8080"`
-	FileStoragePath string `env:"FILE_STORAGE_PATH"`
+	FileStoragePath string `env:"FILE_STORAGE_PATH" envDefault:"storage.json"`
+	DatabaseDSN     string `env:"DATABASE_DSN"`
+	Key             []byte
 }
 
 func checkExists(f string) bool {
@@ -20,7 +24,14 @@ func checkExists(f string) bool {
 func New() Config {
 	var c Config
 
-	err := env.Parse(&c)
+	random, err := helpers.GenerateRandom(16)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	c.Key = random
+
+	err = env.Parse(&c)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -35,6 +46,10 @@ func New() Config {
 
 	if checkExists("f") {
 		flag.StringVar(&c.FileStoragePath, "f", c.FileStoragePath, "FileStoragePath")
+	}
+
+	if checkExists("d") {
+		flag.StringVar(&c.DatabaseDSN, "d", c.DatabaseDSN, "DatabaseDSN")
 	}
 
 	flag.Parse()
