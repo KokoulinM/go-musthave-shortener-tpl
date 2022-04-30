@@ -1,10 +1,10 @@
 package router
 
 import (
+	"github.com/KokoulinM/go-musthave-shortener-tpl/cmd/shortener/configs"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/configs"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/handlers"
 )
 
