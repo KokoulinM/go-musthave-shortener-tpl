@@ -142,6 +142,9 @@ func (h *Handler) Save(w http.ResponseWriter, r *http.Request) {
 			slURL := fmt.Sprintf("%s/%s", h.baseURL, shortURL)
 
 			_, err = w.Write([]byte(slURL))
+			if err != nil {
+				http.Error(w, "unexpected error when writing the response body", http.StatusInternalServerError)
+			}
 
 			return
 		}

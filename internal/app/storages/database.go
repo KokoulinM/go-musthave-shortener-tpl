@@ -6,12 +6,11 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/jackc/pgerrcode"
-	"github.com/jackc/pgx"
-
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/handlers"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/models"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/shortener"
+	"github.com/jackc/pgerrcode"
+	"github.com/lib/pq"
 )
 
 type PostgresDatabase struct {
@@ -41,8 +40,10 @@ func (db *PostgresDatabase) AddURL(ctx context.Context, longURL models.LongURL, 
 
 	_, err := db.conn.ExecContext(ctx, sqlAddRow, user, longURL, shortURL)
 
-	if err, ok := err.(*pgx.PgError); ok {
-		if err.Code == pgerrcode.UniqueViolation {
+	var pgErr *pq.Error
+
+	if errors.As(err, &pgErr) {
+		if err.(*pq.Error).Code == pgerrcode.UniqueViolation {
 			return handlers.NewErrorWithDB(err, "UniqConstraint")
 		}
 	}

@@ -10,6 +10,7 @@ require (
 	github.com/jackc/pgconn v1.12.0 // indirect
 	github.com/jackc/pgerrcode v0.0.0-20220416144525-469b46aa5efa // indirect
 	github.com/jackc/pgx v3.6.2+incompatible // indirect
+	github.com/lib/pq v1.10.5 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/stretchr/testify v1.7.1 // indirect
 	go.uber.org/atomic v1.9.0 // indirect

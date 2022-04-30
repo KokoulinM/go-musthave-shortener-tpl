@@ -7,14 +7,14 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/storages"
-	_ "github.com/jackc/pgx/stdlib"
+	_ "github.com/lib/pq"
 
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/configs"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/handlers"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/helpers/database"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/router"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/server"
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/storages"
 )
 
 func main() {
@@ -30,7 +30,7 @@ func main() {
 	var repo handlers.Repository
 
 	if cfg.DatabaseDSN != "" {
-		conn, err := database.Conn("pgx", cfg.DatabaseDSN)
+		conn, err := database.Conn("postgres", cfg.DatabaseDSN)
 		if err != nil {
 			log.Printf("Unable to connect to the database: %s", err.Error())
 		}
