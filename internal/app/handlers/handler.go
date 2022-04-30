@@ -171,6 +171,8 @@ func (h *Handler) SaveJSON(w http.ResponseWriter, r *http.Request) {
 
 	defer r.Body.Close()
 
+	result := map[string]string{}
+
 	body, errReadAll := io.ReadAll(r.Body)
 	if errReadAll != nil {
 		http.Error(w, errReadAll.Error(), http.StatusInternalServerError)
@@ -200,19 +202,37 @@ func (h *Handler) SaveJSON(w http.ResponseWriter, r *http.Request) {
 
 	shortURL := shortener.ShorterURL(url.URL)
 
+	slURL := fmt.Sprintf("%s/%s", h.baseURL, shortURL)
+
 	err = h.repo.AddURL(r.Context(), url.URL, shortURL, userID)
 	if err != nil {
+		var dbErr *ErrorWithDB
+		if errors.As(err, &dbErr) && dbErr.Title == "UniqConstraint" {
+			result["result"] = slURL
+
+			w.Header().Add("Content-Type", "application/json; charset=utf-8")
+			w.WriteHeader(http.StatusConflict)
+
+			body, err = json.Marshal(result)
+			if err != nil {
+				http.Error(w, "an unexpected error when marshaling JSON", http.StatusInternalServerError)
+				return
+			}
+
+			_, err = w.Write(body)
+			if err != nil {
+				http.Error(w, "unexpected error when writing the response body", http.StatusInternalServerError)
+				return
+			}
+
+			return
+		}
+
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	slURL := fmt.Sprintf("%s/%s", h.baseURL, shortURL)
-
-	result := struct {
-		Result string `json:"result"`
-	}{
-		Result: slURL,
-	}
+	result["result"] = slURL
 
 	w.Header().Add("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusCreated)
