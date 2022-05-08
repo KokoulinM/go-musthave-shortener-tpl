@@ -1,10 +1,10 @@
 package router
 
 import (
-	"github.com/KokoulinM/go-musthave-shortener-tpl/cmd/shortener/configs"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
+	"github.com/KokoulinM/go-musthave-shortener-tpl/cmd/shortener/configs"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/handlers"
 )
 
@@ -23,6 +23,7 @@ func New(repo handlers.Repository, cfg configs.Config) *chi.Mux {
 		router.Get("/ping", h.PingDB)
 		router.Post("/api/shorten", h.SaveJSON)
 		router.Get("/api/user/urls", h.GetLinks)
+		router.Delete("/api/user/urls", h.DeleteLinks)
 		router.Post("/api/shorten/batch", h.CreateBatch)
 	})
 

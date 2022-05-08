@@ -129,6 +129,10 @@ func (repo *Repository) GetUserURLs(ctx context.Context, userID models.UserID) (
 	return result, nil
 }
 
+func (repo *Repository) DeleteMultipleURLs(ctx context.Context, ids []string, user models.UserID) error {
+	return nil
+}
+
 func (repo *Repository) Ping(ctx context.Context) error {
 	return errors.New("not supported with filebase repository")
 }

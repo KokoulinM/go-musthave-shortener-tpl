@@ -55,14 +55,13 @@ func (db *PostgresDatabase) AddURL(ctx context.Context, longURL models.LongURL, 
 
 func (db *PostgresDatabase) AddMultipleURLs(ctx context.Context, urls []handlers.RequestGetURLs, user models.UserID) ([]handlers.ResponseGetURLs, error) {
 	var result []handlers.ResponseGetURLs
-	tx, err := db.conn.Begin()
 
+	tx, err := db.conn.Begin()
 	if err != nil {
 		return nil, err
 	}
 
 	stmt, err := tx.PrepareContext(ctx, `INSERT INTO urls (user_id, origin_url, short_url) VALUES ($1, $2, $3)`)
-
 	if err != nil {
 		return nil, err
 	}
@@ -99,6 +98,46 @@ func (db *PostgresDatabase) AddMultipleURLs(ctx context.Context, urls []handlers
 	}
 
 	return result, nil
+}
+
+func (db *PostgresDatabase) DeleteMultipleURLs(ctx context.Context, ids []string, user models.UserID) error {
+	tx, err := db.conn.Begin()
+	if err != nil {
+		return err
+	}
+
+	stmt, err := tx.PrepareContext(ctx, `UPDATE urls SET is_deleted=true WHERE id=$1 AND user_id=$2;`)
+	if err != nil {
+		return err
+	}
+
+	defer func(tx *sql.Tx) {
+		_ = tx.Rollback()
+	}(tx)
+
+	defer func(stmt *sql.Stmt) {
+		err = stmt.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(stmt)
+
+	for _, id := range ids {
+		if _, err = stmt.ExecContext(ctx, id, user); err != nil {
+			return err
+		}
+	}
+
+	if err != nil {
+		return err
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (db *PostgresDatabase) GetURL(ctx context.Context, shortURL models.ShortURL) (models.ShortURL, error) {

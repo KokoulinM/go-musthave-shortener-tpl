@@ -21,6 +21,7 @@ type Repository interface {
 	AddURL(ctx context.Context, longURL models.LongURL, shortURL models.ShortURL, user models.UserID) error
 	GetURL(ctx context.Context, shortURL models.ShortURL) (models.ShortURL, error)
 	GetUserURLs(ctx context.Context, user models.UserID) ([]ResponseGetURL, error)
+	DeleteMultipleURLs(ctx context.Context, ids []string, user models.UserID) error
 	Ping(ctx context.Context) error
 	AddMultipleURLs(ctx context.Context, urls []RequestGetURLs, user models.UserID) ([]ResponseGetURLs, error)
 }
@@ -289,6 +290,45 @@ func (h *Handler) GetLinks(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (h *Handler) DeleteLinks(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodDelete {
+		http.Error(w, "only DELETE requests are allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	userIDCtx := r.Context().Value(middlewares.UserIDCtxName)
+
+	userID := "default"
+
+	if userIDCtx != nil {
+		userID = userIDCtx.(string)
+	}
+
+	defer r.Body.Close()
+
+	var data []string
+
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = json.Unmarshal(body, &data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = h.repo.DeleteMultipleURLs(r.Context(), data, userID)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	w.WriteHeader(http.StatusAccepted)
+
+}
+
 func (h *Handler) CreateBatch(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "only POST requests are allowed", http.StatusMethodNotAllowed)
@@ -313,15 +353,11 @@ func (h *Handler) CreateBatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println("body: ", body)
-
 	err = json.Unmarshal(body, &data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	log.Println("data: ", data)
 
 	urls, err := h.repo.AddMultipleURLs(r.Context(), data, userID)
 	if err != nil {
@@ -330,15 +366,11 @@ func (h *Handler) CreateBatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println("urls: ", urls)
-
 	body, err = json.Marshal(urls)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	log.Println("body: ", body)
 
 	w.Header().Add("Content-Type", "application/json; charset=utf-8")
 
