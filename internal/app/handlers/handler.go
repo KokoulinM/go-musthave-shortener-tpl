@@ -91,6 +91,13 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 
 	url, err := h.repo.GetURL(r.Context(), id)
 	if err != nil {
+		var dbErr *ErrorWithDB
+
+		if errors.As(err, &dbErr) && dbErr.Title == "deleted" {
+			w.WriteHeader(http.StatusGone)
+			return
+		}
+
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}

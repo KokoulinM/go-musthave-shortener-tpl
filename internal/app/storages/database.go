@@ -141,22 +141,22 @@ func (db *PostgresDatabase) DeleteMultipleURLs(ctx context.Context, ids []string
 }
 
 func (db *PostgresDatabase) GetURL(ctx context.Context, shortURL models.ShortURL) (models.ShortURL, error) {
-	sqlGetURLRow := `SELECT origin_url FROM urls WHERE short_url=$1 LIMIT 1`
+	sqlGetURLRow := `SELECT origin_url, is_deleted FROM urls WHERE short_url=$1 LIMIT 1`
 
 	row := db.conn.QueryRowContext(ctx, sqlGetURLRow, shortURL)
 
 	result := GetURLData{}
 
-	err := row.Scan(&result.OriginalURL)
+	err := row.Scan(&result.OriginalURL, &result.IsDeleted)
 	if err != nil {
 		return "", err
 	}
 
 	if result.OriginalURL == "" {
-		return "", errors.New("not found")
+		return "", handlers.NewErrorWithDB(errors.New("not found"), "Not found")
 	}
 	if result.IsDeleted {
-		return "", errors.New("deleted")
+		return "", handlers.NewErrorWithDB(errors.New("deleted"), "deleted")
 	}
 
 	return result.OriginalURL, nil
