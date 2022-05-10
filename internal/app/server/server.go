@@ -31,7 +31,8 @@ func New(addr string, key []byte, handler *chi.Mux) *Server {
 }
 
 func (s *Server) Start() error {
-	if err := http.ListenAndServe(s.addr, s.handler); err != http.ErrServerClosed {
+	err := s.s.ListenAndServe()
+	if err != nil {
 		return err
 	}
 

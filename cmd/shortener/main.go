@@ -65,12 +65,11 @@ func main() {
 		httpServer = server.New(cfg.ServerAddress, cfg.Key, handler)
 
 		err := httpServer.Start()
-
-		log.Printf("httpServer starting at: %v", cfg.ServerAddress)
-
 		if err != nil {
 			return err
 		}
+
+		log.Printf("httpServer starting at: %v", cfg.ServerAddress)
 
 		return nil
 	})
