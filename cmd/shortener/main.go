@@ -52,6 +52,10 @@ func main() {
 
 	wp := workers.New(ctx, cfg.Workers, cfg.WorkersBuffer)
 
+	go func() {
+		wp.Run(ctx)
+	}()
+
 	handler := router.New(repo, cfg, *wp)
 
 	g.Go(func() error {
