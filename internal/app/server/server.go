@@ -8,27 +8,36 @@ import (
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/handlers/middlewares"
 )
 
-type server struct {
+type Server struct {
 	addr    string
 	key     []byte
 	handler *chi.Mux
 }
 
-func New(addr string, key []byte, handler *chi.Mux) *server {
-	return &server{
+func New(addr string, key []byte, handler *chi.Mux) *Server {
+	return &Server{
 		addr:    addr,
 		key:     key,
 		handler: handler,
 	}
 }
 
-func (s *server) Start() error {
+func (s *Server) Start() error {
 	srv := &http.Server{
 		Addr:    s.addr,
 		Handler: middlewares.Conveyor(s.handler, middlewares.GzipMiddleware, middlewares.CookieMiddleware(s.key)),
 	}
 
 	if err := http.ListenAndServe(srv.Addr, srv.Handler); err != http.ErrServerClosed {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Server) Shutdown() error {
+	err := s.Shutdown()
+	if err != nil {
 		return err
 	}
 

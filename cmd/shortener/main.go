@@ -6,7 +6,9 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/workers"
 	_ "github.com/lib/pq"
 	"golang.org/x/sync/errgroup"
 
@@ -16,10 +18,11 @@ import (
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/handlers"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/server"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/storages"
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/workers"
 )
 
 func main() {
+	var httpServer *server.Server
+
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -30,6 +33,12 @@ func main() {
 	cfg := configs.New()
 
 	var repo handlers.Repository
+
+	wp := workers.New(ctx, cfg.Workers, cfg.WorkersBuffer)
+
+	go func() {
+		wp.Run(ctx)
+	}()
 
 	if cfg.DatabaseDSN != "" {
 		conn, err := database.Conn("postgres", cfg.DatabaseDSN)
@@ -50,18 +59,12 @@ func main() {
 
 	g, ctx := errgroup.WithContext(ctx)
 
-	wp := workers.New(ctx, cfg.Workers, cfg.WorkersBuffer)
-
-	go func() {
-		wp.Run(ctx)
-	}()
-
-	handler := router.New(repo, cfg, *wp)
+	handler := router.New(repo, cfg, wp)
 
 	g.Go(func() error {
-		serv := server.New(cfg.ServerAddress, cfg.Key, handler)
+		httpServer = server.New(cfg.ServerAddress, cfg.Key, handler)
 
-		err := serv.Start()
+		err := httpServer.Start()
 
 		log.Printf("httpServer starting at: %v", cfg.ServerAddress)
 
@@ -77,6 +80,16 @@ func main() {
 		break
 	case <-ctx.Done():
 		break
+	}
+
+	log.Println("Receive shutdown signal")
+
+	_, shutdownCancel := context.WithTimeout(context.Background(), 5*time.Second)
+
+	defer shutdownCancel()
+
+	if httpServer != nil {
+		_ = httpServer.Shutdown()
 	}
 
 	err := g.Wait()

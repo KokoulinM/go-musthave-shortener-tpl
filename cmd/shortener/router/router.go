@@ -9,8 +9,8 @@ import (
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/workers"
 )
 
-func New(repo handlers.Repository, cfg configs.Config, wp workers.WorkerPool) *chi.Mux {
-	h := handlers.New(repo, cfg.BaseURL, &wp)
+func New(repo handlers.Repository, cfg configs.Config, wp *workers.WorkerPool) *chi.Mux {
+	h := handlers.New(repo, cfg.BaseURL, wp)
 
 	router := chi.NewRouter()
 
