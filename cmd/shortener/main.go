@@ -84,12 +84,12 @@ func main() {
 
 	log.Println("Receive shutdown signal")
 
-	_, shutdownCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 5*time.Second)
 
 	defer shutdownCancel()
 
 	if httpServer != nil {
-		_ = httpServer.Shutdown()
+		_ = httpServer.Shutdown(shutdownCtx)
 	}
 
 	err := g.Wait()
