@@ -125,7 +125,9 @@ func (db *PostgresDatabase) DeleteMultipleURLs(ctx context.Context, urls []strin
 	var urlsToDelete []string
 
 	for _, url := range urls {
-		if db.isOwner(ctx, url, user) {
+		isOwner, err := db.isOwner(ctx, url, user)
+
+		if err == nil && isOwner {
 			urlsToDelete = append(urlsToDelete, url)
 		}
 	}
@@ -148,12 +150,17 @@ func (db *PostgresDatabase) DeleteMultipleURLs(ctx context.Context, urls []strin
 	return nil
 }
 
-func (db *PostgresDatabase) isOwner(ctx context.Context, url string, user string) bool {
+func (db *PostgresDatabase) isOwner(ctx context.Context, url string, user string) (bool, error) {
 	sqlGetURLRow := `SELECT user_id FROM urls WHERE short_url=$1 FETCH FIRST ROW ONLY;`
 	query := db.conn.QueryRowContext(ctx, sqlGetURLRow, url)
 	result := ""
-	query.Scan(&result)
-	return result == user
+
+	err := query.Scan(&result)
+	if err != nil {
+		return false, err
+	}
+
+	return result == user, nil
 }
 
 func (db *PostgresDatabase) GetURL(ctx context.Context, shortURL models.ShortURL) (models.ShortURL, error) {
