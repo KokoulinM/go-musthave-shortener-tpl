@@ -8,6 +8,7 @@ import (
 	"syscall"
 
 	_ "github.com/lib/pq"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/KokoulinM/go-musthave-shortener-tpl/cmd/shortener/configs"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/cmd/shortener/database"
@@ -47,20 +48,36 @@ func main() {
 		repo = storages.NewFileRepository(ctx, cfg.FileStoragePath, cfg.BaseURL)
 	}
 
+	g, ctx := errgroup.WithContext(ctx)
+
 	wp := workers.New(ctx, cfg.Workers, cfg.WorkersBuffer)
 
 	handler := router.New(repo, cfg, *wp)
 
-	serv := server.New(cfg.ServerAddress, cfg.Key, handler)
+	g.Go(func() error {
+		serv := server.New(cfg.ServerAddress, cfg.Key, handler)
 
-	go func() {
-		serv.Start()
-	}()
+		err := serv.Start()
+
+		log.Printf("httpServer starting at: %v", cfg.ServerAddress)
+
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
 
 	select {
 	case <-interrupt:
 		break
 	case <-ctx.Done():
 		break
+	}
+
+	err := g.Wait()
+	if err != nil {
+		log.Printf("server returning an error: %v", err)
+		os.Exit(2)
 	}
 }

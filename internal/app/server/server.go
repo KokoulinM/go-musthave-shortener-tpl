@@ -1,7 +1,6 @@
 package server
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -23,11 +22,15 @@ func New(addr string, key []byte, handler *chi.Mux) *server {
 	}
 }
 
-func (s *server) Start() {
+func (s *server) Start() error {
 	srv := &http.Server{
 		Addr:    s.addr,
 		Handler: middlewares.Conveyor(s.handler, middlewares.GzipMiddleware, middlewares.CookieMiddleware(s.key)),
 	}
 
-	log.Fatal(http.ListenAndServe(srv.Addr, srv.Handler))
+	if err := http.ListenAndServe(srv.Addr, srv.Handler); err != http.ErrServerClosed {
+		return err
+	}
+
+	return nil
 }
