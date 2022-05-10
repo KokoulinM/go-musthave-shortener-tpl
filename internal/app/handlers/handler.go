@@ -30,7 +30,7 @@ type Repository interface {
 type Handler struct {
 	repo    Repository
 	baseURL string
-	wp      workers.WorkerPool
+	wp      *workers.WorkerPool
 }
 
 type URL struct {
@@ -76,7 +76,7 @@ func New(repo Repository, baseURL string, wp *workers.WorkerPool) *Handler {
 	return &Handler{
 		repo:    repo,
 		baseURL: baseURL,
-		wp:      *wp,
+		wp:      wp,
 	}
 }
 
