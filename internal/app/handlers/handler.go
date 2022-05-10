@@ -10,11 +10,12 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/shortener"
 	"github.com/go-chi/chi/v5"
 
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/handlers/middlewares"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/models"
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/shortener"
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/workers"
 )
 
 type Repository interface {
@@ -29,6 +30,7 @@ type Repository interface {
 type Handler struct {
 	repo    Repository
 	baseURL string
+	wp      workers.WorkerPool
 }
 
 type URL struct {
@@ -70,10 +72,11 @@ func NewErrorWithDB(err error, title string) error {
 	}
 }
 
-func New(repo Repository, baseURL string) *Handler {
+func New(repo Repository, baseURL string, wp *workers.WorkerPool) *Handler {
 	return &Handler{
 		repo:    repo,
 		baseURL: baseURL,
+		wp:      *wp,
 	}
 }
 
@@ -327,13 +330,27 @@ func (h *Handler) DeleteLinks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.repo.DeleteMultipleURLs(r.Context(), data, userID)
-	if err != nil {
-		log.Fatal(err)
+	var sliceData [][]string
+
+	for i := 10; i <= len(data); i += 10 {
+		sliceData = append(sliceData, data[i-10:i])
+	}
+
+	rem := len(data) % 10
+	if rem > 0 {
+		sliceData = append(sliceData, data[len(data)-rem:])
+	}
+
+	for _, item := range sliceData {
+		func(taskData []string) {
+			h.wp.Push(func(ctx context.Context) error {
+				err := h.repo.DeleteMultipleURLs(ctx, taskData, userID)
+				return err
+			})
+		}(item)
 	}
 
 	w.WriteHeader(http.StatusAccepted)
-
 }
 
 func (h *Handler) CreateBatch(w http.ResponseWriter, r *http.Request) {

@@ -15,6 +15,7 @@ import (
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/handlers"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/server"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/storages"
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/workers"
 )
 
 func main() {
@@ -46,7 +47,9 @@ func main() {
 		repo = storages.NewFileRepository(ctx, cfg.FileStoragePath, cfg.BaseURL)
 	}
 
-	handler := router.New(repo, cfg)
+	wp := workers.New(ctx, cfg.Workers, cfg.WorkersBuffer)
+
+	handler := router.New(repo, cfg, *wp)
 
 	serv := server.New(cfg.ServerAddress, cfg.Key, handler)
 
