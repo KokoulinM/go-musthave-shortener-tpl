@@ -22,9 +22,11 @@ func New(ctx context.Context, workers int, buffer int) *WorkerPool {
 
 func (wp *WorkerPool) Run(ctx context.Context) {
 	wg := &sync.WaitGroup{}
+
 	for i := 0; i < wp.workers; i++ {
 		wg.Add(1)
 		go func(i int) {
+			defer wg.Done()
 			fmt.Printf("Worker #%v start \n", i)
 		outer:
 			for {
@@ -37,10 +39,8 @@ func (wp *WorkerPool) Run(ctx context.Context) {
 				case <-ctx.Done():
 					break outer
 				}
-
 			}
 			log.Printf("Worker #%v close\n", i)
-			wg.Done()
 		}(i)
 	}
 	wg.Wait()

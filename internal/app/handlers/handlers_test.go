@@ -1,5 +1,39 @@
 package handlers
 
+import "testing"
+
+func TestCreateShortURL(t *testing.T) {
+	type want struct {
+		code        int
+		response    string
+		contentType string
+	}
+
+	tests := []struct {
+		name   string
+		body   string
+		result string
+		want   want
+	}{
+		{
+			name:   "positive test",
+			body:   "https://go.dev",
+			result: "suNu2gXD_LK3aL0z5AsfO6ywMEM=",
+			want: want{
+				code:        201,
+				response:    "http://localhost:8080/suNu2gXD_LK3aL0z5AsfO6ywMEM=",
+				contentType: "text/plain; charset=utf-8",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+		})
+	}
+}
+
 //func TestGetHandler(t *testing.T) {
 //	c := configs.New()
 //	database := database.New(new(sql.DB))

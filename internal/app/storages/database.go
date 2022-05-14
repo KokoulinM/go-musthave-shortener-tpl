@@ -53,7 +53,7 @@ func (db *PostgresDatabase) AddURL(ctx context.Context, longURL models.LongURL, 
 	return err
 }
 
-func (db *PostgresDatabase) AddMultipleURLs(ctx context.Context, urls []handlers.RequestGetURLs, user models.UserID) ([]handlers.ResponseGetURLs, error) {
+func (db *PostgresDatabase) AddMultipleURLs(ctx context.Context, user models.UserID, urls ...handlers.RequestGetURLs) ([]handlers.ResponseGetURLs, error) {
 	var result []handlers.ResponseGetURLs
 
 	tx, err := db.conn.Begin()
@@ -100,7 +100,7 @@ func (db *PostgresDatabase) AddMultipleURLs(ctx context.Context, urls []handlers
 	return result, nil
 }
 
-func (db *PostgresDatabase) DeleteMultipleURLs(ctx context.Context, urls []string, user models.UserID) error {
+func (db *PostgresDatabase) DeleteMultipleURLs(ctx context.Context, user models.UserID, urls ...string) error {
 	tx, err := db.conn.Begin()
 	if err != nil {
 		return err

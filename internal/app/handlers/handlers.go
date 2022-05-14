@@ -10,24 +10,23 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/go-chi/chi/v5"
-
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/handlers/middlewares"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/models"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/shortener"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/workers"
+	"github.com/go-chi/chi/v5"
 )
 
 type Repository interface {
 	AddURL(ctx context.Context, longURL models.LongURL, shortURL models.ShortURL, user models.UserID) error
 	GetURL(ctx context.Context, shortURL models.ShortURL) (models.ShortURL, error)
 	GetUserURLs(ctx context.Context, user models.UserID) ([]ResponseGetURL, error)
-	DeleteMultipleURLs(ctx context.Context, ids []string, user models.UserID) error
+	DeleteMultipleURLs(ctx context.Context, user models.UserID, urls ...string) error
 	Ping(ctx context.Context) error
-	AddMultipleURLs(ctx context.Context, urls []RequestGetURLs, user models.UserID) ([]ResponseGetURLs, error)
+	AddMultipleURLs(ctx context.Context, user models.UserID, urls ...RequestGetURLs) ([]ResponseGetURLs, error)
 }
 
-type Handler struct {
+type Handlers struct {
 	repo    Repository
 	baseURL string
 	wp      *workers.WorkerPool
@@ -72,15 +71,15 @@ func NewErrorWithDB(err error, title string) error {
 	}
 }
 
-func New(repo Repository, baseURL string, wp *workers.WorkerPool) *Handler {
-	return &Handler{
+func New(repo Repository, baseURL string, wp *workers.WorkerPool) *Handlers {
+	return &Handlers{
 		repo:    repo,
 		baseURL: baseURL,
 		wp:      wp,
 	}
 }
 
-func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) RetrieveShortURL(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "only GET requests are allowed", http.StatusMethodNotAllowed)
 		return
@@ -110,7 +109,7 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 }
 
-func (h *Handler) Save(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) CreateShortURL(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "only POST requests are allowed", http.StatusMethodNotAllowed)
 		return
@@ -174,7 +173,7 @@ func (h *Handler) Save(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *Handler) SaveJSON(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) ShortenURL(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "only POST requests are allowed", http.StatusMethodNotAllowed)
 		return
@@ -261,7 +260,7 @@ func (h *Handler) SaveJSON(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *Handler) GetLinks(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) GetUserURLs(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "only GET requests are allowed", http.StatusMethodNotAllowed)
 		return
@@ -300,7 +299,7 @@ func (h *Handler) GetLinks(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *Handler) DeleteLinks(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) DeleteBatch(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodDelete {
 		http.Error(w, "only DELETE requests are allowed", http.StatusMethodNotAllowed)
 		return
@@ -344,7 +343,7 @@ func (h *Handler) DeleteLinks(w http.ResponseWriter, r *http.Request) {
 	for _, item := range sliceData {
 		func(taskData []string) {
 			h.wp.Push(func(ctx context.Context) error {
-				err := h.repo.DeleteMultipleURLs(ctx, taskData, userID)
+				err := h.repo.DeleteMultipleURLs(ctx, userID, taskData...)
 				return err
 			})
 		}(item)
@@ -353,7 +352,7 @@ func (h *Handler) DeleteLinks(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusAccepted)
 }
 
-func (h *Handler) CreateBatch(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) CreateBatch(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "only POST requests are allowed", http.StatusMethodNotAllowed)
 		return
@@ -383,7 +382,7 @@ func (h *Handler) CreateBatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	urls, err := h.repo.AddMultipleURLs(r.Context(), data, userID)
+	urls, err := h.repo.AddMultipleURLs(r.Context(), userID, data...)
 	if err != nil {
 		log.Println("err.Error(): ", err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -407,7 +406,7 @@ func (h *Handler) CreateBatch(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *Handler) PingDB(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) PingDB(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "only GET requests are allowed", http.StatusMethodNotAllowed)
 		return

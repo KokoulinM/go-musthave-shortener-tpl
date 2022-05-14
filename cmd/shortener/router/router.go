@@ -18,13 +18,12 @@ func New(repo handlers.Repository, cfg configs.Config, wp *workers.WorkerPool) *
 	router.Use(middleware.Recoverer)
 
 	router.Route("/", func(r chi.Router) {
-		router.Get("/", h.Get)
-		router.Post("/", h.Save)
-		router.Get("/{id}", h.Get)
+		router.Post("/", h.CreateShortURL)
+		router.Get("/{id}", h.RetrieveShortURL)
 		router.Get("/ping", h.PingDB)
-		router.Post("/api/shorten", h.SaveJSON)
-		router.Get("/api/user/urls", h.GetLinks)
-		router.Delete("/api/user/urls", h.DeleteLinks)
+		router.Post("/api/shorten", h.ShortenURL)
+		router.Get("/api/user/urls", h.GetUserURLs)
+		router.Delete("/api/user/urls", h.DeleteBatch)
 		router.Post("/api/shorten/batch", h.CreateBatch)
 	})
 

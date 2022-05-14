@@ -8,7 +8,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/workers"
 	_ "github.com/lib/pq"
 	"golang.org/x/sync/errgroup"
 
@@ -18,6 +17,7 @@ import (
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/handlers"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/server"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/storages"
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/workers"
 )
 
 func main() {
