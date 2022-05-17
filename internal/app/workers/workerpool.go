@@ -10,14 +10,15 @@ import (
 type WorkerPool struct {
 	workers int
 	inputCh chan func(ctx context.Context) error
+	done    chan struct{}
 }
 
 func New(ctx context.Context, workers int, buffer int) *WorkerPool {
-	wp := &WorkerPool{
+	return &WorkerPool{
 		workers: workers,
 		inputCh: make(chan func(ctx context.Context) error, buffer),
+		done:    make(chan struct{}),
 	}
-	return wp
 }
 
 func (wp *WorkerPool) Run(ctx context.Context) {
@@ -36,7 +37,7 @@ func (wp *WorkerPool) Run(ctx context.Context) {
 					if err != nil {
 						fmt.Printf("Error on worker #%v: %v\n", i, err.Error())
 					}
-				case <-ctx.Done():
+				case <-wp.done:
 					break outer
 				}
 			}
@@ -45,6 +46,10 @@ func (wp *WorkerPool) Run(ctx context.Context) {
 	}
 	wg.Wait()
 	close(wp.inputCh)
+}
+
+func (wp *WorkerPool) Stop() {
+	close(wp.done)
 }
 
 func (wp *WorkerPool) Push(task func(ctx context.Context) error) {

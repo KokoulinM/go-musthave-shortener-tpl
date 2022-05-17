@@ -45,7 +45,7 @@ func (db *PostgresDatabase) AddURL(ctx context.Context, longURL models.LongURL, 
 	var pgErr *pq.Error
 
 	if errors.As(err, &pgErr) {
-		if err.(*pq.Error).Code == pgerrcode.UniqueViolation {
+		if pgErr.Code == pgerrcode.UniqueViolation {
 			return handlers.NewErrorWithDB(err, "UniqConstraint")
 		}
 	}

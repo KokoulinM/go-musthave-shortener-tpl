@@ -39,6 +39,7 @@ func main() {
 	go func() {
 		wp.Run(ctx)
 	}()
+	defer wp.Stop()
 
 	if cfg.DatabaseDSN != "" {
 		conn, err := database.Conn("postgres", cfg.DatabaseDSN)
