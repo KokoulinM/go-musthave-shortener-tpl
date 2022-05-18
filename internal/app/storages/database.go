@@ -45,7 +45,7 @@ func (db *PostgresDatabase) AddURL(ctx context.Context, longURL models.LongURL, 
 	var pgErr *pq.Error
 
 	if errors.As(err, &pgErr) {
-		if err.(*pq.Error).Code == pgerrcode.UniqueViolation {
+		if pgErr.Code == pgerrcode.UniqueViolation {
 			return handlers.NewErrorWithDB(err, "UniqConstraint")
 		}
 	}
@@ -53,16 +53,15 @@ func (db *PostgresDatabase) AddURL(ctx context.Context, longURL models.LongURL, 
 	return err
 }
 
-func (db *PostgresDatabase) AddMultipleURLs(ctx context.Context, urls []handlers.RequestGetURLs, user models.UserID) ([]handlers.ResponseGetURLs, error) {
+func (db *PostgresDatabase) AddMultipleURLs(ctx context.Context, user models.UserID, urls ...handlers.RequestGetURLs) ([]handlers.ResponseGetURLs, error) {
 	var result []handlers.ResponseGetURLs
-	tx, err := db.conn.Begin()
 
+	tx, err := db.conn.Begin()
 	if err != nil {
 		return nil, err
 	}
 
 	stmt, err := tx.PrepareContext(ctx, `INSERT INTO urls (user_id, origin_url, short_url) VALUES ($1, $2, $3)`)
-
 	if err != nil {
 		return nil, err
 	}
@@ -101,23 +100,86 @@ func (db *PostgresDatabase) AddMultipleURLs(ctx context.Context, urls []handlers
 	return result, nil
 }
 
+func (db *PostgresDatabase) DeleteMultipleURLs(ctx context.Context, user models.UserID, urls ...string) error {
+	tx, err := db.conn.Begin()
+	if err != nil {
+		return err
+	}
+
+	stmt, err := tx.PrepareContext(ctx, `UPDATE urls SET is_deleted=true WHERE short_url=$1;`)
+	if err != nil {
+		return err
+	}
+
+	defer func(tx *sql.Tx) {
+		_ = tx.Rollback()
+	}(tx)
+
+	defer func(stmt *sql.Stmt) {
+		err = stmt.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(stmt)
+
+	var urlsToDelete []string
+
+	for _, url := range urls {
+		isOwner, err := db.isOwner(ctx, url, user)
+
+		if err == nil && isOwner {
+			urlsToDelete = append(urlsToDelete, url)
+		}
+	}
+
+	for _, url := range urlsToDelete {
+		if _, err = stmt.ExecContext(ctx, url); err != nil {
+			return err
+		}
+	}
+
+	if err != nil {
+		return err
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db *PostgresDatabase) isOwner(ctx context.Context, url string, user string) (bool, error) {
+	sqlGetURLRow := `SELECT user_id FROM urls WHERE short_url=$1 FETCH FIRST ROW ONLY;`
+	query := db.conn.QueryRowContext(ctx, sqlGetURLRow, url)
+	result := ""
+
+	err := query.Scan(&result)
+	if err != nil {
+		return false, err
+	}
+
+	return result == user, nil
+}
+
 func (db *PostgresDatabase) GetURL(ctx context.Context, shortURL models.ShortURL) (models.ShortURL, error) {
-	sqlGetURLRow := `SELECT origin_url FROM urls WHERE short_url=$1 LIMIT 1`
+	sqlGetURLRow := `SELECT origin_url, is_deleted FROM urls WHERE short_url=$1 LIMIT 1`
 
 	row := db.conn.QueryRowContext(ctx, sqlGetURLRow, shortURL)
 
 	result := GetURLData{}
 
-	err := row.Scan(&result.OriginalURL)
+	err := row.Scan(&result.OriginalURL, &result.IsDeleted)
 	if err != nil {
 		return "", err
 	}
 
 	if result.OriginalURL == "" {
-		return "", errors.New("not found")
+		return "", handlers.NewErrorWithDB(errors.New("not found"), "Not found")
 	}
 	if result.IsDeleted {
-		return "", errors.New("deleted")
+		return "", handlers.NewErrorWithDB(errors.New("deleted"), "deleted")
 	}
 
 	return result.OriginalURL, nil
