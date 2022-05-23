@@ -10,24 +10,26 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/shortener"
-	"github.com/go-chi/chi/v5"
-
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/handlers/middlewares"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/models"
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/shortener"
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/workers"
+	"github.com/go-chi/chi/v5"
 )
 
 type Repository interface {
 	AddURL(ctx context.Context, longURL models.LongURL, shortURL models.ShortURL, user models.UserID) error
 	GetURL(ctx context.Context, shortURL models.ShortURL) (models.ShortURL, error)
 	GetUserURLs(ctx context.Context, user models.UserID) ([]ResponseGetURL, error)
+	DeleteMultipleURLs(ctx context.Context, user models.UserID, urls ...string) error
 	Ping(ctx context.Context) error
-	AddMultipleURLs(ctx context.Context, urls []RequestGetURLs, user models.UserID) ([]ResponseGetURLs, error)
+	AddMultipleURLs(ctx context.Context, user models.UserID, urls ...RequestGetURLs) ([]ResponseGetURLs, error)
 }
 
-type Handler struct {
+type Handlers struct {
 	repo    Repository
 	baseURL string
+	wp      *workers.WorkerPool
 }
 
 type URL struct {
@@ -69,14 +71,15 @@ func NewErrorWithDB(err error, title string) error {
 	}
 }
 
-func New(repo Repository, baseURL string) *Handler {
-	return &Handler{
+func New(repo Repository, baseURL string, wp *workers.WorkerPool) *Handlers {
+	return &Handlers{
 		repo:    repo,
 		baseURL: baseURL,
+		wp:      wp,
 	}
 }
 
-func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) RetrieveShortURL(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "only GET requests are allowed", http.StatusMethodNotAllowed)
 		return
@@ -90,6 +93,13 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 
 	url, err := h.repo.GetURL(r.Context(), id)
 	if err != nil {
+		var dbErr *ErrorWithDB
+
+		if errors.As(err, &dbErr) && dbErr.Title == "deleted" {
+			w.WriteHeader(http.StatusGone)
+			return
+		}
+
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
@@ -99,7 +109,7 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 }
 
-func (h *Handler) Save(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) CreateShortURL(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "only POST requests are allowed", http.StatusMethodNotAllowed)
 		return
@@ -163,7 +173,7 @@ func (h *Handler) Save(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *Handler) SaveJSON(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) ShortenURL(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "only POST requests are allowed", http.StatusMethodNotAllowed)
 		return
@@ -250,7 +260,7 @@ func (h *Handler) SaveJSON(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *Handler) GetLinks(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) GetUserURLs(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "only GET requests are allowed", http.StatusMethodNotAllowed)
 		return
@@ -289,7 +299,60 @@ func (h *Handler) GetLinks(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *Handler) CreateBatch(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) DeleteBatch(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodDelete {
+		http.Error(w, "only DELETE requests are allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	userIDCtx := r.Context().Value(middlewares.UserIDCtxName)
+
+	userID := "default"
+
+	if userIDCtx != nil {
+		userID = userIDCtx.(string)
+	}
+
+	defer r.Body.Close()
+
+	var data []string
+
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = json.Unmarshal(body, &data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var sliceData [][]string
+
+	for i := 10; i <= len(data); i += 10 {
+		sliceData = append(sliceData, data[i-10:i])
+	}
+
+	rem := len(data) % 10
+	if rem > 0 {
+		sliceData = append(sliceData, data[len(data)-rem:])
+	}
+
+	for _, item := range sliceData {
+		func(taskData []string) {
+			h.wp.Push(func(ctx context.Context) error {
+				err := h.repo.DeleteMultipleURLs(ctx, userID, taskData...)
+				return err
+			})
+		}(item)
+	}
+
+	w.WriteHeader(http.StatusAccepted)
+}
+
+func (h *Handlers) CreateBatch(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "only POST requests are allowed", http.StatusMethodNotAllowed)
 		return
@@ -313,32 +376,24 @@ func (h *Handler) CreateBatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println("body: ", body)
-
 	err = json.Unmarshal(body, &data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	log.Println("data: ", data)
-
-	urls, err := h.repo.AddMultipleURLs(r.Context(), data, userID)
+	urls, err := h.repo.AddMultipleURLs(r.Context(), userID, data...)
 	if err != nil {
 		log.Println("err.Error(): ", err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	log.Println("urls: ", urls)
-
 	body, err = json.Marshal(urls)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	log.Println("body: ", body)
 
 	w.Header().Add("Content-Type", "application/json; charset=utf-8")
 
@@ -351,7 +406,7 @@ func (h *Handler) CreateBatch(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *Handler) PingDB(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) PingDB(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "only GET requests are allowed", http.StatusMethodNotAllowed)
 		return

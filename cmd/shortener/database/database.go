@@ -32,7 +32,8 @@ func SetUpDataBase(ctx context.Context, db *sql.DB) error {
 								id serial PRIMARY KEY,
 								user_id VARCHAR NOT NULL, 	
 								origin_url VARCHAR NOT NULL, 
-								short_url VARCHAR NOT NULL UNIQUE
+								short_url VARCHAR NOT NULL UNIQUE,
+                                is_deleted BOOLEAN NOT NULL DEFAULT FALSE
 					);`
 	res, err := db.ExecContext(ctx, sqlCreateDB)
 
