@@ -35,7 +35,7 @@ func main() {
 			log.Printf("Unable to connect to the database: %s", err.Error())
 		}
 
-		err = database.SetUpDataBase(conn, ctx)
+		err = database.SetUpDataBase(ctx, conn)
 
 		if err != nil {
 			log.Printf("Unable to create database struct: %s", err.Error())

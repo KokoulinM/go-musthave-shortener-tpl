@@ -26,7 +26,7 @@ func Conn(driverName, dsn string) (*sql.DB, error) {
 	return db, nil
 }
 
-func SetUpDataBase(db *sql.DB, ctx context.Context) error {
+func SetUpDataBase(ctx context.Context, db *sql.DB) error {
 
 	sqlCreateDB := `CREATE TABLE IF NOT EXISTS urls (
 								id serial PRIMARY KEY,
