@@ -4,9 +4,9 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
-	"github.com/KokoulinM/go-musthave-shortener-tpl/cmd/shortener/configs"
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/handlers"
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/workers"
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/configs"
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/handlers"
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/workers"
 )
 
 func New(repo handlers.Repository, cfg configs.Config, wp *workers.WorkerPool) *chi.Mux {
