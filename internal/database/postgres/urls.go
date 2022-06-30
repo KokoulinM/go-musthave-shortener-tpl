@@ -1,4 +1,4 @@
-package storages
+package postgres
 
 import (
 	"context"
@@ -10,9 +10,9 @@ import (
 	"github.com/jackc/pgerrcode"
 	"github.com/lib/pq"
 
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/handlers"
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/models"
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/shortener"
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/handlers"
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/models"
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/shortener"
 )
 
 type PostgresDatabase struct {

@@ -38,13 +38,13 @@ func TestCreateShortURL(t *testing.T) {
 //	c := configs.New()
 //	database := database.New(new(sql.DB))
 //	h := New(database, c)
-//	s := storages.MockStorage{
-//		Data: make(map[storages.UserID]storages.ShortLinks),
+//	s := database.MockStorage{
+//		Data: make(map[database.UserID]database.ShortLinks),
 //	}
 //
 //	s.GenerateMockData()
 //
-//	h.storages = &s
+//	h.database = &s
 //
 //	type want struct {
 //		code        int
@@ -88,7 +88,7 @@ func TestCreateShortURL(t *testing.T) {
 //			},
 //		},
 //		{
-//			name: "negative test Get handler empty row in the storages",
+//			name: "negative test Get handler empty row in the database",
 //			want: want{
 //				code:        http.StatusNotFound,
 //				response:    "<a href=\"https://go.dev\">Temporary Redirect</a>.\n\n",
@@ -132,13 +132,13 @@ func TestCreateShortURL(t *testing.T) {
 //	c := configs.New()
 //	database := database.New(new(sql.DB))
 //	h := New(database, c)
-//	s := storages.MockStorage{
-//		Data: make(map[storages.UserID]storages.ShortLinks),
+//	s := database.MockStorage{
+//		Data: make(map[database.UserID]database.ShortLinks),
 //	}
 //
 //	s.GenerateMockData()
 //
-//	h.storages = &s
+//	h.database = &s
 //
 //	type want struct {
 //		code        int
@@ -202,13 +202,13 @@ func TestCreateShortURL(t *testing.T) {
 //	c := configs.New()
 //	database := database.New(new(sql.DB))
 //	h := New(database, c)
-//	s := storages.MockStorage{
-//		Data: make(map[storages.UserID]storages.ShortLinks),
+//	s := database.MockStorage{
+//		Data: make(map[database.UserID]database.ShortLinks),
 //	}
 //
 //	s.GenerateMockData()
 //
-//	h.storages = &s
+//	h.database = &s
 //
 //	type want struct {
 //		code        int

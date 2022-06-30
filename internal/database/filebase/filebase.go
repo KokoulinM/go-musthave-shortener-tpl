@@ -1,4 +1,4 @@
-package storages
+package filebase
 
 import (
 	"bufio"
@@ -10,8 +10,8 @@ import (
 	"os"
 	"sync"
 
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/handlers"
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/models"
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/handlers"
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/models"
 )
 
 type Repository struct {
@@ -63,12 +63,12 @@ func NewFileRepository(ctx context.Context, filePath string, baseURL string) han
 }
 
 type Producer interface {
-	//WriteEvent(event *storages)
+	//WriteEvent(event *database)
 	Close() error
 }
 
 type Consumer interface {
-	//ReadEvent() (*storages, error)
+	//ReadEvent() (*database, error)
 	Close() error
 }
 

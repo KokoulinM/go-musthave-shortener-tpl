@@ -6,8 +6,8 @@ import (
 
 	"github.com/gofrs/uuid"
 
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/helpers"
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/helpers/encryptor"
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/helpers"
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/helpers/encryptor"
 )
 
 const CookieUserIDName = "user_id"

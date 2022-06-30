@@ -10,10 +10,10 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/handlers/middlewares"
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/models"
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/shortener"
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/workers"
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/handlers/middlewares"
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/models"
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/shortener"
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/workers"
 	"github.com/go-chi/chi/v5"
 )
 

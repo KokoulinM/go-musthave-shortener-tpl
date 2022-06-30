@@ -8,16 +8,16 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/database/filebase"
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/database/postgres"
 	_ "github.com/lib/pq"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/KokoulinM/go-musthave-shortener-tpl/cmd/shortener/configs"
-	"github.com/KokoulinM/go-musthave-shortener-tpl/cmd/shortener/database"
-	"github.com/KokoulinM/go-musthave-shortener-tpl/cmd/shortener/router"
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/handlers"
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/server"
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/storages"
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/app/workers"
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/configs"
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/handlers"
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/router"
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/server"
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/workers"
 )
 
 func main() {
@@ -41,20 +41,20 @@ func main() {
 	}()
 	defer wp.Stop()
 	if cfg.DatabaseDSN != "" {
-		conn, err := database.Conn("postgres", cfg.DatabaseDSN)
+		conn, err := postgres.Conn("postgres", cfg.DatabaseDSN)
 		if err != nil {
 			log.Printf("Unable to connect to the database: %s", err.Error())
 		}
 
-		err = database.SetUpDataBase(ctx, conn)
+		err = postgres.SetUpDataBase(ctx, conn)
 
 		if err != nil {
 			log.Printf("Unable to create database struct: %s", err.Error())
 		}
 
-		repo = storages.NewDatabaseRepository(cfg.BaseURL, conn)
+		repo = postgres.NewDatabaseRepository(cfg.BaseURL, conn)
 	} else {
-		repo = storages.NewFileRepository(ctx, cfg.FileStoragePath, cfg.BaseURL)
+		repo = filebase.NewFileRepository(ctx, cfg.FileStoragePath, cfg.BaseURL)
 	}
 
 	g, ctx := errgroup.WithContext(ctx)
