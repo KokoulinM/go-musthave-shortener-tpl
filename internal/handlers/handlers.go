@@ -10,11 +10,12 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/go-chi/chi/v5"
+
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/handlers/middlewares"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/models"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/shortener"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/workers"
-	"github.com/go-chi/chi/v5"
 )
 
 type Repository interface {
@@ -160,6 +161,7 @@ func (h *Handlers) CreateShortURL(w http.ResponseWriter, r *http.Request) {
 		}
 
 		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
 	w.Header().Add("Content-Type", "text/plain; charset=utf-8")
