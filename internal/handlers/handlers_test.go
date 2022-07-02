@@ -11,12 +11,34 @@ import (
 
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/handlers/middlewares"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/configs"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/workers"
 )
+
+func router(repo Repository, baseURL string, wp *workers.WorkerPool) *chi.Mux {
+	h := New(repo, baseURL, wp)
+
+	router := chi.NewRouter()
+
+	router.Use(middleware.Logger)
+	router.Use(middleware.Recoverer)
+
+	router.Route("/", func(r chi.Router) {
+		router.Post("/", h.CreateShortURL)
+		router.Get("/{id}", h.RetrieveShortURL)
+		router.Get("/ping", h.PingDB)
+		router.Post("/api/shorten", h.ShortenURL)
+		router.Get("/api/user/urls", h.GetUserURLs)
+		router.Delete("/api/user/urls", h.DeleteBatch)
+		router.Post("/api/shorten/batch", h.CreateBatch)
+	})
+
+	return router
+}
 
 func TestCreateShortURL(t *testing.T) {
 	type want struct {
@@ -115,6 +137,79 @@ func TestCreateShortURL(t *testing.T) {
 
 			assert.Equal(t, tt.want.code, w.Code)
 			assert.Equal(t, tt.want.response, string(body))
+		})
+	}
+}
+
+func TestRetrieveShortURL(t *testing.T) {
+	type want struct {
+		code        int
+		response    string
+		contentType string
+	}
+
+	tests := []struct {
+		name      string
+		query     string
+		mockError error
+		mockID    string
+		mockURL   string
+		want      want
+	}{
+		{
+			name:      "positive test",
+			query:     "/Vq7zU8E5b7sLZo3qY82UKYRvQ-A=",
+			mockError: nil,
+			mockID:    "Vq7zU8E5b7sLZo3qY82UKYRvQ-A=",
+			mockURL:   "https://go.dev",
+			want: want{
+				code: http.StatusTemporaryRedirect,
+			},
+		},
+		{
+			name:      "deleted",
+			query:     "/Vq7zU8E5b7sLZo3qY82UKYRvQ-A=",
+			mockError: NewErrorWithDB(errors.New("deleted"), "deleted"),
+			mockID:    "Vq7zU8E5b7sLZo3qY82UKYRvQ-A=",
+			mockURL:   "https://go.dev",
+			want: want{
+				code: http.StatusGone,
+			},
+		},
+		{
+			name:      "deleted",
+			query:     "/Vq7zU8E5b7sLZo3qY82UKYRvQ-A=",
+			mockError: errors.New(""),
+			mockID:    "Vq7zU8E5b7sLZo3qY82UKYRvQ-A=",
+			mockURL:   "https://go.dev",
+			want: want{
+				code: http.StatusNotFound,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req, _ := http.NewRequest(http.MethodGet, tt.query, nil)
+
+			w := httptest.NewRecorder()
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			cfg := configs.New()
+
+			wp := workers.New(context.Background(), cfg.Workers, cfg.WorkersBuffer)
+
+			repoMock := NewMockRepository(ctrl)
+
+			r := router(repoMock, cfg.BaseURL, wp)
+
+			repoMock.EXPECT().GetURL(gomock.Any(), tt.mockID).Return(tt.mockURL, tt.mockError).AnyTimes()
+
+			r.ServeHTTP(w, req)
+
+			assert.Equal(t, tt.want.code, w.Code)
 		})
 	}
 }
