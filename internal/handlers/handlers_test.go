@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"io/ioutil"
 	"net/http"
@@ -110,8 +112,6 @@ func TestCreateShortURL(t *testing.T) {
 			req, _ := http.NewRequest(http.MethodPost, tt.query, strings.NewReader(tt.body))
 			w := httptest.NewRecorder()
 
-			r := chi.NewRouter()
-
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
@@ -121,9 +121,7 @@ func TestCreateShortURL(t *testing.T) {
 
 			repoMock := NewMockRepository(ctrl)
 
-			h := New(repoMock, cfg.BaseURL, wp)
-
-			r.Post(tt.query, h.CreateShortURL)
+			r := router(repoMock, cfg.BaseURL, wp)
 
 			repoMock.EXPECT().AddURL(gomock.Any(), tt.body, tt.mockURL, "userID").Return(tt.mockError).AnyTimes()
 
@@ -210,6 +208,70 @@ func TestRetrieveShortURL(t *testing.T) {
 			r.ServeHTTP(w, req)
 
 			assert.Equal(t, tt.want.code, w.Code)
+		})
+	}
+}
+
+func TestShortenURL(t *testing.T) {
+	type want struct {
+		code        int
+		response    string
+		contentType string
+	}
+
+	tests := []struct {
+		name      string
+		query     string
+		body      string
+		mockError error
+		mockURL   string
+		want      want
+	}{
+		{
+			name:      "positive test",
+			query:     "/api/shorten",
+			body:      `{"url":"https://go.dev"}`,
+			mockError: nil,
+			mockURL:   "Vq7zU8E5b7sLZo3qY82UKYRvQ-A=",
+			want: want{
+				code:     http.StatusCreated,
+				response: `{"result":"http://localhost:8080/Vq7zU8E5b7sLZo3qY82UKYRvQ-A="}`,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req, _ := http.NewRequest(http.MethodPost, tt.query, strings.NewReader(tt.body))
+			w := httptest.NewRecorder()
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			cfg := configs.New()
+
+			wp := workers.New(context.Background(), cfg.Workers, cfg.WorkersBuffer)
+
+			repoMock := NewMockRepository(ctrl)
+
+			r := router(repoMock, cfg.BaseURL, wp)
+
+			url := URL{}
+
+			_ = json.Unmarshal(bytes.NewBufferString(tt.body).Bytes(), &url)
+
+			repoMock.EXPECT().AddURL(gomock.Any(), url.URL, tt.mockURL, "userID").Return(tt.mockError).AnyTimes()
+
+			r.ServeHTTP(w, req.WithContext(context.WithValue(req.Context(), middlewares.UserIDCtxName, "userID")))
+
+			response := w.Result()
+
+			defer response.Body.Close()
+
+			body, _ := ioutil.ReadAll(response.Body)
+
+			assert.Equal(t, tt.want.code, w.Code)
+			assert.Equal(t, tt.want.response, string(body))
 		})
 	}
 }
