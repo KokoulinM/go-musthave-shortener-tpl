@@ -15,9 +15,9 @@ import (
 )
 
 type Repository struct {
-	urls     models.ShortURLs
 	filePath string
 	baseURL  string
+	urls     models.ShortURLs
 	usersURL map[models.UserID][]models.ShortURL
 	mtx      sync.Mutex
 }

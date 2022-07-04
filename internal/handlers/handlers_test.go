@@ -238,6 +238,39 @@ func TestShortenURL(t *testing.T) {
 				response: `{"result":"http://localhost:8080/Vq7zU8E5b7sLZo3qY82UKYRvQ-A="}`,
 			},
 		},
+		{
+			name:      "when unmarshaling JSON",
+			query:     "/api/shorten",
+			body:      `{"url":"}`,
+			mockError: nil,
+			mockURL:   "Vq7zU8E5b7sLZo3qY82UKYRvQ-A=",
+			want: want{
+				code:     http.StatusInternalServerError,
+				response: "an unexpected error when unmarshaling JSON\n",
+			},
+		},
+		{
+			name:      "the URL property is missing",
+			query:     "/api/shorten",
+			body:      `{"url":""}`,
+			mockError: nil,
+			mockURL:   "Vq7zU8E5b7sLZo3qY82UKYRvQ-A=",
+			want: want{
+				code:     http.StatusBadRequest,
+				response: "the URL property is missing\n",
+			},
+		},
+		{
+			name:      "UniqConstraint",
+			query:     "/api/shorten",
+			body:      `{"url":"https://go.dev"}`,
+			mockError: NewErrorWithDB(errors.New("UniqConstraint"), "UniqConstraint"),
+			mockURL:   "Vq7zU8E5b7sLZo3qY82UKYRvQ-A=",
+			want: want{
+				code:     http.StatusConflict,
+				response: "{\"result\":\"http://localhost:8080/Vq7zU8E5b7sLZo3qY82UKYRvQ-A=\"}",
+			},
+		},
 	}
 
 	for _, tt := range tests {
