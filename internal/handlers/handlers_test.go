@@ -376,3 +376,60 @@ func TestGetUserURLs(t *testing.T) {
 		})
 	}
 }
+
+func TestDeleteBatch(t *testing.T) {
+	type want struct {
+		code        int
+		response    string
+		contentType string
+	}
+
+	tests := []struct {
+		name      string
+		query     string
+		mockError error
+		mockURLs  []ResponseGetURL
+		want      want
+	}{
+		{
+			name:      "positive test",
+			query:     "/api/user/urls",
+			mockError: nil,
+			mockURLs:  nil,
+			want: want{
+				code: http.StatusOK,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req, _ := http.NewRequest(http.MethodDelete, tt.query, nil)
+			w := httptest.NewRecorder()
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			cfg := configs.New()
+
+			wp := workers.New(context.Background(), cfg.Workers, cfg.WorkersBuffer)
+
+			repoMock := NewMockRepository(ctrl)
+
+			r := router(repoMock, cfg.BaseURL, wp)
+
+			repoMock.EXPECT().DeleteMultipleURLs(gomock.Any(), "userID").Return(tt.mockURLs, tt.mockError).AnyTimes()
+
+			r.ServeHTTP(w, req.WithContext(context.WithValue(req.Context(), middlewares.UserIDCtxName, "userID")))
+
+			response := w.Result()
+
+			defer response.Body.Close()
+
+			body, _ := ioutil.ReadAll(response.Body)
+
+			assert.Equal(t, tt.want.code, w.Code)
+			assert.Equal(t, tt.want.response, string(body))
+		})
+	}
+}
