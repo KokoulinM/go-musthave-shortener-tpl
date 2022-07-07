@@ -387,24 +387,37 @@ func TestDeleteBatch(t *testing.T) {
 	tests := []struct {
 		name      string
 		query     string
+		body      string
 		mockError error
-		mockURLs  []ResponseGetURL
+		mockURLs  []string
 		want      want
 	}{
 		{
 			name:      "positive test",
 			query:     "/api/user/urls",
+			body:      `["", ""]`,
 			mockError: nil,
-			mockURLs:  nil,
+			mockURLs:  []string{"", ""},
 			want: want{
-				code: http.StatusOK,
+				code: http.StatusAccepted,
+			},
+		},
+		{
+			name:      "unexpected end of JSON input",
+			query:     "/api/user/urls",
+			body:      `["]`,
+			mockError: nil,
+			mockURLs:  []string{"", ""},
+			want: want{
+				code:     http.StatusInternalServerError,
+				response: "unexpected end of JSON input\n",
 			},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			req, _ := http.NewRequest(http.MethodDelete, tt.query, nil)
+			req, _ := http.NewRequest(http.MethodDelete, tt.query, strings.NewReader(tt.body))
 			w := httptest.NewRecorder()
 
 			ctrl := gomock.NewController(t)
@@ -418,7 +431,7 @@ func TestDeleteBatch(t *testing.T) {
 
 			r := router(repoMock, cfg.BaseURL, wp)
 
-			repoMock.EXPECT().DeleteMultipleURLs(gomock.Any(), "userID").Return(tt.mockURLs, tt.mockError).AnyTimes()
+			repoMock.EXPECT().DeleteMultipleURLs(gomock.Any(), "userID", tt.mockURLs).Return(tt.mockError).AnyTimes()
 
 			r.ServeHTTP(w, req.WithContext(context.WithValue(req.Context(), middlewares.UserIDCtxName, "userID")))
 
