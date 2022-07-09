@@ -8,12 +8,15 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/database/filebase"
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/database/postgres"
+	_ "net/http/pprof"
+
 	_ "github.com/lib/pq"
+
 	"golang.org/x/sync/errgroup"
 
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/configs"
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/database/filebase"
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/database/postgres"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/handlers"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/router"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/server"

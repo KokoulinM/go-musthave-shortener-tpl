@@ -405,7 +405,7 @@ func TestDeleteBatch(t *testing.T) {
 		{
 			name:      "unexpected end of JSON input",
 			query:     "/api/user/urls",
-			body:      `["", ""]`,
+			body:      `["]`,
 			mockError: nil,
 			mockURLs:  []string{"", ""},
 			want: want{
