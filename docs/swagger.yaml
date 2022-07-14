@@ -1,0 +1,39 @@
+info:
+  contact: {}
+  description: URL Shortener Service
+  title: Shortener API
+  version: "1.0"
+paths:
+  /{id}:
+    get:
+      consumes:
+      - application/json
+      description: Getting a short URL by ID
+      operationId: storageGetBucket
+      parameters:
+      - description: URL ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "307":
+          description: Temporary Redirect
+          schema:
+            type: string
+        "400":
+          description: the parameter is missing
+          schema:
+            type: string
+        "404":
+          description: the parameter not found
+          schema:
+            type: string
+        "410":
+          description: the parameter was deleted
+          schema:
+            type: string
+      summary: Getting a short URL
+swagger: "2.0"
