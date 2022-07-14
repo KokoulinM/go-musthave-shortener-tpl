@@ -21,3 +21,10 @@ go test ./... -v -short -p 1 -cover
 ````
 golangci-lint run
 ````
+
+# Swagger
+````
+go install github.com/swaggo/swag/cmd/swag@latest 
+
+swag init -g internal/handlers/handlers.go
+````

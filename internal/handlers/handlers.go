@@ -18,6 +18,10 @@ import (
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/workers"
 )
 
+// @Title Shortener API
+// @Description URL Shortener Service
+// @Version 1.0
+
 type Repository interface {
 	AddURL(ctx context.Context, longURL models.LongURL, shortURL models.ShortURL, user models.UserID) error
 	GetURL(ctx context.Context, shortURL models.ShortURL) (models.ShortURL, error)
@@ -80,12 +84,19 @@ func New(repo Repository, baseURL string, wp *workers.WorkerPool) *Handlers {
 	}
 }
 
+// RetrieveShortURL godoc
+// @Summary Getting a short URL
+// @Description Getting a short URL by ID
+// @ID storageGetBucket
+// @Accept  json
+// @Produce json
+// @Param id path string true "URL ID"
+// @Success 307 {string} string RetrieveShortURLResponse
+// @Failure 400 {string} string "the parameter is missing"
+// @Failure 410 {string} string "the parameter was deleted"
+// @Failure 404 {string} string "the parameter not found"
+// @Router /{id} [get]
 func (h *Handlers) RetrieveShortURL(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "only GET requests are allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	id := chi.URLParam(r, "id")
 	if id == "" {
 		http.Error(w, "the parameter is missing", http.StatusBadRequest)

@@ -1,3 +1,4 @@
+// Package configs is global configuration for application operation.
 package configs
 
 import (
@@ -10,15 +11,23 @@ import (
 )
 
 type Config struct {
-	BaseURL         string `env:"BASE_URL" envDefault:"http://localhost:8080"`
-	ServerAddress   string `env:"SERVER_ADDRESS" envDefault:":8080"`
+	// BaseURL - base app address
+	BaseURL string `env:"BASE_URL" envDefault:"http://localhost:8080"`
+	// ServerAddress - server address
+	ServerAddress string `env:"SERVER_ADDRESS" envDefault:":8080"`
+	// FileStoragePath - path to the filebase
 	FileStoragePath string `env:"FILE_STORAGE_PATH" envDefault:"storage.json"`
-	DatabaseDSN     string `env:"DATABASE_DSN"`
-	Key             []byte
-	Workers         int `env:"WORKERS" envDefault:"10"`
-	WorkersBuffer   int `env:"WORKERS_BUFFER" envDefault:"100"`
+	// DatabaseDSN - path to the database
+	DatabaseDSN string `env:"DATABASE_DSN"`
+	// Key - encryption key
+	Key []byte
+	// Workers - number of workers
+	Workers int `env:"WORKERS" envDefault:"10"`
+	// WorkersBuffer - buffer size value
+	WorkersBuffer int `env:"WORKERS_BUFFER" envDefault:"100"`
 }
 
+// The function checks for the presence of a flag. f - flag values
 func checkExists(f string) bool {
 	return flag.Lookup(f) == nil
 }
