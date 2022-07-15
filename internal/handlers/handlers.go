@@ -143,10 +143,10 @@ func (h *Handlers) RetrieveShortURL(w http.ResponseWriter, r *http.Request) {
 // @Accept  json
 // @Produce json
 // @Param url_data body string true "Contains a string with an url"
-// @Success 307 {string} string RetrieveShortURLResponse
-// @Failure 400 {string} string "the parameter is missing"
-// @Failure 410 {string} string "the parameter was deleted"
-// @Failure 404 {string} string "the parameter not found"
+// @Success 201 {string} string "short url"
+// @Failure 400 {string} string "the body cannot be an empty"
+// @Failure 409 {string} string "the same URL already exists"
+// @Failure 500 {string} string "unexpected error when writing the response body"
 // @Router / [post]
 func (h *Handlers) CreateShortURL(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
@@ -208,6 +208,18 @@ func (h *Handlers) CreateShortURL(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// ShortenURL godoc
+// @Summary method to save a single url
+// @Description method to get a single long url by a short url
+// @ID shortenURL
+// @Accept  json
+// @Produce json
+// @Param url_data body map[string]string{} true "Contains a JSON with an url"
+// @Success 201 {string} string "short url"	
+// @Failure 400 {string} string "the URL property is missing"
+// @Failure 409 {string} string "the same URL already exists"
+// @Failure 500 {string} string "an unexpected error when unmarshaling JSON"
+// @Router /api/shorten [post]
 func (h *Handlers) ShortenURL(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
@@ -290,6 +302,16 @@ func (h *Handlers) ShortenURL(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// GetUserURLs godoc
+// @Summary method to get list of urls
+// @Description method to get list of urls
+// @ID getUserURLs
+// @Accept  json
+// @Produce json
+// @Success 200 {array} ResponseGetURL
+// @Failure 204 {array} string "no content"
+// @Failure 500 {string} string "an unexpected error when unmarshaling JSON"
+// @Router /api/user/urls [get]
 func (h *Handlers) GetUserURLs(w http.ResponseWriter, r *http.Request) {
 	userIDCtx := r.Context().Value(middlewares.UserIDCtxName)
 
@@ -324,6 +346,16 @@ func (h *Handlers) GetUserURLs(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// DeleteBatch godoc
+// @Summary
+// @Description
+// @ID deleteBatch
+// @Accept  json
+// @Produce json
+// @Param url_data body []string true "Contains urls"
+// @Success 202
+// @Failure 500 {string} string "500 Internal Server Error"
+// @Router /api/user/urls [delete]
 func (h *Handlers) DeleteBatch(w http.ResponseWriter, r *http.Request) {
 	userIDCtx := r.Context().Value(middlewares.UserIDCtxName)
 
@@ -372,6 +404,15 @@ func (h *Handlers) DeleteBatch(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusAccepted)
 }
 
+// CreateBatch godoc
+// @Summary
+// @Description
+// @ID createBatch
+// @Accept  json
+// @Produce json
+// @Param url_data body []RequestGetURLs true "Contains urls"
+// @Success 201 {array} ResponseGetURLs
+// @Failure 500 {string} string "500 Internal Server Error"
 func (h *Handlers) CreateBatch(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
