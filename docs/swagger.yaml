@@ -1,3 +1,25 @@
+definitions:
+  handlers.RequestGetURLs:
+    properties:
+      correlation_id:
+        type: string
+      original_url:
+        type: string
+    type: object
+  handlers.ResponseGetURL:
+    properties:
+      original_url:
+        type: string
+      short_url:
+        type: string
+    type: object
+  handlers.ResponseGetURLs:
+    properties:
+      correlation_id:
+        type: string
+      short_url:
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact:
@@ -22,20 +44,20 @@ paths:
       produces:
       - application/json
       responses:
-        "307":
-          description: Temporary Redirect
+        "201":
+          description: short url
           schema:
             type: string
         "400":
-          description: the parameter is missing
+          description: the body cannot be an empty
           schema:
             type: string
-        "404":
-          description: the parameter not found
+        "409":
+          description: the same URL already exists
           schema:
             type: string
-        "410":
-          description: the parameter was deleted
+        "500":
+          description: unexpected error when writing the response body
           schema:
             type: string
       summary: method to save a single url
@@ -71,4 +93,86 @@ paths:
           schema:
             type: string
       summary: method to get a single long url
+  /api/shorten:
+    post:
+      consumes:
+      - application/json
+      description: method to get a single long url by a short url
+      operationId: shortenURL
+      parameters:
+      - description: Contains a JSON with an url
+        in: body
+        name: url_data
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: short url
+          schema:
+            type: string
+        "400":
+          description: the URL property is missing
+        "409":
+          description: the same URL already exists
+        "500":
+          description: an unexpected error when unmarshaling JSON
+          schema:
+            type: string
+      summary: method to save a single url
+  /api/user/urls:
+    delete:
+      consumes:
+      - application/json
+      operationId: deleteBatch
+      parameters:
+      - description: Contains urls
+        in: body
+        name: url_data
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: ""
+        "500":
+          description: 500 Internal Server Error
+          schema:
+            type: string
+    get:
+      consumes:
+      - application/json
+      description: method to get list of urls
+      operationId: getUserURLs
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/handlers.ResponseGetURL'
+            type: array
+        "204":
+          description: no content
+          schema:
+            items:
+              type: string
+            type: array
+        "500":
+          description: an unexpected error when unmarshaling JSON
+          schema:
+            type: string
+      summary: method to get list of urls
 swagger: "2.0"
+tags:
+- description: '"Group of service status requests"'
+  name: Shortener

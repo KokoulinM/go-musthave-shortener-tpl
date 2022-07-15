@@ -1,6 +1,9 @@
 package helpers
 
 import (
+	"fmt"
+	"log"
+	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -60,4 +63,33 @@ func TestGenerateRandom(t *testing.T) {
 			assert.Equal(t, tt.want, got)
 		})
 	}
+}
+
+func ExampleGenerateRandom() {
+	bytes, err := GenerateRandom(5)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(bytes)
+}
+
+func ExampleRandomString() {
+	s := RandomString(5)
+
+	fmt.Println(s)
+}
+
+func ExampleCreateCookie() {
+	cookie := CreateCookie("userID", "0xFF")
+
+	CookieMiddleware := func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			http.SetCookie(w, cookie)
+
+			next.ServeHTTP(w, r)
+		})
+	}
+
+	fmt.Println(CookieMiddleware)
 }
