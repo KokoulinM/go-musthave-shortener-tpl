@@ -22,12 +22,26 @@ import (
 // @Description URL Shortener Service
 // @Version 1.0
 
+// @Contact.email kokoulin92@gmail.com
+
+// @Host      localhost:8080
+
+// @Tag.name Shortener
+// @Tag.description "Group of service status requests"
+
+// Repository contains the main methods of getting data from the storage
 type Repository interface {
+	// AddURL - saving a single url to the repository
 	AddURL(ctx context.Context, longURL models.LongURL, shortURL models.ShortURL, user models.UserID) error
+	// GetURL - get a single long url by a short url
 	GetURL(ctx context.Context, shortURL models.ShortURL) (models.ShortURL, error)
+	// GetUserURLs - get a list urls
 	GetUserURLs(ctx context.Context, user models.UserID) ([]ResponseGetURL, error)
+	// DeleteMultipleURLs - deleting a bunch of URLs
 	DeleteMultipleURLs(ctx context.Context, user models.UserID, urls ...string) error
+	// Ping - method for checking the operation of the storage
 	Ping(ctx context.Context) error
+	// AddMultipleURLs - adding a bunch of URLs
 	AddMultipleURLs(ctx context.Context, user models.UserID, urls ...RequestGetURLs) ([]ResponseGetURLs, error)
 }
 
@@ -76,6 +90,7 @@ func NewErrorWithDB(err error, title string) error {
 	}
 }
 
+// New is the handlers constructor
 func New(repo Repository, baseURL string, wp *workers.WorkerPool) *Handlers {
 	return &Handlers{
 		repo:    repo,
@@ -85,12 +100,12 @@ func New(repo Repository, baseURL string, wp *workers.WorkerPool) *Handlers {
 }
 
 // RetrieveShortURL godoc
-// @Summary Getting a short URL
-// @Description Getting a short URL by ID
-// @ID storageGetBucket
+// @Summary method to get a single long url
+// @Description method to get a single long url by a short url
+// @ID retrieveShortURL
 // @Accept  json
 // @Produce json
-// @Param id path string true "URL ID"
+// @Param id path string true "ShortURL"
 // @Success 307 {string} string RetrieveShortURLResponse
 // @Failure 400 {string} string "the parameter is missing"
 // @Failure 410 {string} string "the parameter was deleted"
@@ -121,12 +136,19 @@ func (h *Handlers) RetrieveShortURL(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 }
 
+// CreateShortURL godoc
+// @Summary method to save a single url
+// @Description method to get a single long url by a short url
+// @ID createShortURL
+// @Accept  json
+// @Produce json
+// @Param url_data body string true "Contains a string with an url"
+// @Success 307 {string} string RetrieveShortURLResponse
+// @Failure 400 {string} string "the parameter is missing"
+// @Failure 410 {string} string "the parameter was deleted"
+// @Failure 404 {string} string "the parameter not found"
+// @Router / [post]
 func (h *Handlers) CreateShortURL(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "only POST requests are allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	defer r.Body.Close()
 
 	body, err := io.ReadAll(r.Body)
@@ -187,11 +209,6 @@ func (h *Handlers) CreateShortURL(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) ShortenURL(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "only POST requests are allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	defer r.Body.Close()
 
 	result := map[string]string{}
@@ -274,11 +291,6 @@ func (h *Handlers) ShortenURL(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) GetUserURLs(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "only GET requests are allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	userIDCtx := r.Context().Value(middlewares.UserIDCtxName)
 
 	userID := "default"
@@ -313,11 +325,6 @@ func (h *Handlers) GetUserURLs(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) DeleteBatch(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodDelete {
-		http.Error(w, "only DELETE requests are allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	userIDCtx := r.Context().Value(middlewares.UserIDCtxName)
 
 	userID := "default"
@@ -366,11 +373,6 @@ func (h *Handlers) DeleteBatch(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) CreateBatch(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "only POST requests are allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	defer r.Body.Close()
 
 	var data []RequestGetURLs
@@ -420,11 +422,6 @@ func (h *Handlers) CreateBatch(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) PingDB(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "only GET requests are allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	err := h.repo.Ping(r.Context())
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

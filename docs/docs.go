@@ -10,27 +10,79 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "contact": {},
+        "contact": {
+            "email": "kokoulin92@gmail.com"
+        },
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/{id}": {
-            "get": {
-                "description": "Getting a short URL by ID",
+        "/": {
+            "post": {
+                "description": "method to get a single long url by a short url",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Getting a short URL",
-                "operationId": "storageGetBucket",
+                "summary": "method to save a single url",
+                "operationId": "createShortURL",
+                "parameters": [
+                    {
+                        "description": "Contains a string with an url",
+                        "name": "url_data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "307": {
+                        "description": "Temporary Redirect",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "the parameter is missing",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "the parameter not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "410": {
+                        "description": "the parameter was deleted",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/{id}": {
+            "get": {
+                "description": "method to get a single long url by a short url",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "method to get a single long url",
+                "operationId": "retrieveShortURL",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "URL ID",
+                        "description": "ShortURL",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -70,7 +122,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "",
+	Host:             "localhost:8080",
 	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "Shortener API",
