@@ -62,10 +62,12 @@ func main() {
 
 	g, ctx := errgroup.WithContext(ctx)
 
-	handler := router.New(repo, cfg, wp)
+	h := handlers.New(repo, cfg.BaseURL, wp)
+
+	mux := router.New(h)
 
 	g.Go(func() error {
-		httpServer = server.New(cfg.ServerAddress, cfg.Key, handler)
+		httpServer = server.New(cfg.ServerAddress, cfg.Key, mux)
 
 		err := httpServer.Start()
 		if err != nil {

@@ -1,3 +1,4 @@
+// Package workers receive work on the jobs channel and send the corresponding results on results.
 package workers
 
 import (
@@ -8,11 +9,15 @@ import (
 )
 
 type WorkerPool struct {
+	// workers -number of workers
 	workers int
+	// inputCh - these channel will receive work
 	inputCh chan func(ctx context.Context) error
-	done    chan struct{}
+	// done - channel for stopping the work of the worker
+	done chan struct{}
 }
 
+// New is the worker constructor
 func New(ctx context.Context, workers int, buffer int) *WorkerPool {
 	return &WorkerPool{
 		workers: workers,
@@ -21,6 +26,7 @@ func New(ctx context.Context, workers int, buffer int) *WorkerPool {
 	}
 }
 
+// Run is the method to start the worker
 func (wp *WorkerPool) Run(ctx context.Context) {
 	wg := &sync.WaitGroup{}
 
@@ -48,10 +54,12 @@ func (wp *WorkerPool) Run(ctx context.Context) {
 	close(wp.inputCh)
 }
 
+// Stop is the method to stop the worker
 func (wp *WorkerPool) Stop() {
 	close(wp.done)
 }
 
+// Push is the method to push into the inputCh
 func (wp *WorkerPool) Push(task func(ctx context.Context) error) {
 	wp.inputCh <- task
 }

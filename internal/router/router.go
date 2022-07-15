@@ -1,17 +1,15 @@
+// Package router composable HTTP services with a large set of handlers
 package router
 
 import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/configs"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/handlers"
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/workers"
 )
 
-func New(repo handlers.Repository, cfg configs.Config, wp *workers.WorkerPool) *chi.Mux {
-	h := handlers.New(repo, cfg.BaseURL, wp)
-
+// New router constructor
+func New(h *handlers.Handlers) *chi.Mux {
 	router := chi.NewRouter()
 
 	router.Use(middleware.Logger)
