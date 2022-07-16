@@ -83,13 +83,11 @@ func ExampleRandomString() {
 func ExampleCreateCookie() {
 	cookie := CreateCookie("userID", "0xFF")
 
-	CookieMiddleware := func(next http.Handler) http.Handler {
+	_ = func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			http.SetCookie(w, cookie)
 
 			next.ServeHTTP(w, r)
 		})
 	}
-
-	fmt.Println(CookieMiddleware)
 }
