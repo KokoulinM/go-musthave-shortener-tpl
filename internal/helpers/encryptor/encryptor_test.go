@@ -1,6 +1,7 @@
 package encryptor
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/helpers"
@@ -39,6 +40,9 @@ func BenchmarkEncryptor_Decode(b *testing.B) {
 	b.ResetTimer()
 
 	b.Run("decode", func(b *testing.B) {
-		encryptor.Decode(userID.String())
+		_, err := encryptor.Decode(userID.String())
+		if err != nil {
+			fmt.Println(err)
+		}
 	})
 }

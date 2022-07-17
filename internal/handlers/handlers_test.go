@@ -141,9 +141,7 @@ func TestCreateShortURL(t *testing.T) {
 
 func TestRetrieveShortURL(t *testing.T) {
 	type want struct {
-		code        int
-		response    string
-		contentType string
+		code int
 	}
 
 	tests := []struct {
@@ -214,9 +212,8 @@ func TestRetrieveShortURL(t *testing.T) {
 
 func TestShortenURL(t *testing.T) {
 	type want struct {
-		code        int
-		response    string
-		contentType string
+		code     int
+		response string
 	}
 
 	tests := []struct {
@@ -311,9 +308,8 @@ func TestShortenURL(t *testing.T) {
 
 func TestGetUserURLs(t *testing.T) {
 	type want struct {
-		code        int
-		response    string
-		contentType string
+		code     int
+		response string
 	}
 
 	tests := []struct {
@@ -379,9 +375,8 @@ func TestGetUserURLs(t *testing.T) {
 
 func TestDeleteBatch(t *testing.T) {
 	type want struct {
-		code        int
-		response    string
-		contentType string
+		code     int
+		response string
 	}
 
 	tests := []struct {
@@ -449,9 +444,8 @@ func TestDeleteBatch(t *testing.T) {
 
 func TestCreateBatch(t *testing.T) {
 	type want struct {
-		code        int
-		response    string
-		contentType string
+		code     int
+		response string
 	}
 
 	tests := []struct {
