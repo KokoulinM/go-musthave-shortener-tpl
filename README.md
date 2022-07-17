@@ -15,6 +15,7 @@ psql postgres
 ````
 Check coverage
 go test ./... -v -short -p 1 -cover
+go test ./...
 ````
 # Linting
 

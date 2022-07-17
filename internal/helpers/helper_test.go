@@ -60,7 +60,7 @@ func TestGenerateRandom(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got, _ := GenerateRandom(tt.args.size)
 
-			assert.Equal(t, tt.want, got)
+			assert.Equal(t, len(tt.want), len(got))
 		})
 	}
 }
