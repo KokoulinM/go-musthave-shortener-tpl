@@ -14,7 +14,6 @@ const (
 	DefaultBaseURL         = "http://localhost:8080"
 	DefaultServerAddress   = ":8080"
 	DefaultFileStoragePath = "storage.json "
-	DefaultDatabaseDSN     = "user=postgres password=postgres sslmode=disable"
 	DefaultWorkers         = 10
 	DefaultWorkersBuffer   = 100
 )
@@ -80,7 +79,6 @@ func defaultConfig() Config {
 		baseURL:         DefaultBaseURL,
 		serverAddress:   DefaultServerAddress,
 		fileStoragePath: DefaultFileStoragePath,
-		databaseDSN:     DefaultDatabaseDSN,
 		workers:         DefaultWorkers,
 		workersBuffer:   DefaultWorkersBuffer,
 	}
@@ -117,7 +115,7 @@ func New() *Config {
 		}
 
 		if checkExists("d") {
-			flag.StringVar(&config.databaseDSN, "d", DefaultDatabaseDSN, "DatabaseDSN")
+			flag.StringVar(&config.databaseDSN, "d", config.databaseDSN, "DatabaseDSN")
 		}
 
 		if checkExists("w") {
