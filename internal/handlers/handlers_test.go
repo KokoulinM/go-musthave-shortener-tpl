@@ -117,11 +117,11 @@ func TestCreateShortURL(t *testing.T) {
 
 			cfg := configs.New()
 
-			wp := workers.New(context.Background(), cfg.Workers, cfg.WorkersBuffer)
+			wp := workers.New(context.Background(), cfg.Workers(), cfg.WorkersBuffer())
 
 			repoMock := NewMockRepository(ctrl)
 
-			r := router(repoMock, cfg.BaseURL, wp)
+			r := router(repoMock, cfg.BaseURL(), wp)
 
 			repoMock.EXPECT().AddURL(gomock.Any(), tt.body, tt.mockURL, "userID").Return(tt.mockError).AnyTimes()
 
@@ -197,11 +197,11 @@ func TestRetrieveShortURL(t *testing.T) {
 
 			cfg := configs.New()
 
-			wp := workers.New(context.Background(), cfg.Workers, cfg.WorkersBuffer)
+			wp := workers.New(context.Background(), cfg.Workers(), cfg.WorkersBuffer())
 
 			repoMock := NewMockRepository(ctrl)
 
-			r := router(repoMock, cfg.BaseURL, wp)
+			r := router(repoMock, cfg.BaseURL(), wp)
 
 			repoMock.EXPECT().GetURL(gomock.Any(), tt.mockID).Return(tt.mockURL, tt.mockError).AnyTimes()
 
@@ -283,11 +283,11 @@ func TestShortenURL(t *testing.T) {
 
 			cfg := configs.New()
 
-			wp := workers.New(context.Background(), cfg.Workers, cfg.WorkersBuffer)
+			wp := workers.New(context.Background(), cfg.Workers(), cfg.WorkersBuffer())
 
 			repoMock := NewMockRepository(ctrl)
 
-			r := router(repoMock, cfg.BaseURL, wp)
+			r := router(repoMock, cfg.BaseURL(), wp)
 
 			url := URL{}
 
@@ -355,11 +355,11 @@ func TestGetUserURLs(t *testing.T) {
 
 			cfg := configs.New()
 
-			wp := workers.New(context.Background(), cfg.Workers, cfg.WorkersBuffer)
+			wp := workers.New(context.Background(), cfg.Workers(), cfg.WorkersBuffer())
 
 			repoMock := NewMockRepository(ctrl)
 
-			r := router(repoMock, cfg.BaseURL, wp)
+			r := router(repoMock, cfg.BaseURL(), wp)
 
 			repoMock.EXPECT().GetUserURLs(gomock.Any(), "userID").Return(tt.mockURLs, tt.mockError).AnyTimes()
 
@@ -425,11 +425,11 @@ func TestDeleteBatch(t *testing.T) {
 
 			cfg := configs.New()
 
-			wp := workers.New(context.Background(), cfg.Workers, cfg.WorkersBuffer)
+			wp := workers.New(context.Background(), cfg.Workers(), cfg.WorkersBuffer())
 
 			repoMock := NewMockRepository(ctrl)
 
-			r := router(repoMock, cfg.BaseURL, wp)
+			r := router(repoMock, cfg.BaseURL(), wp)
 
 			repoMock.EXPECT().DeleteMultipleURLs(gomock.Any(), "userID", tt.mockURLs).Return(tt.mockError).AnyTimes()
 
@@ -487,11 +487,11 @@ func TestCreateBatch(t *testing.T) {
 
 			cfg := configs.New()
 
-			wp := workers.New(context.Background(), cfg.Workers, cfg.WorkersBuffer)
+			wp := workers.New(context.Background(), cfg.Workers(), cfg.WorkersBuffer())
 
 			repoMock := NewMockRepository(ctrl)
 
-			r := router(repoMock, cfg.BaseURL, wp)
+			r := router(repoMock, cfg.BaseURL(), wp)
 
 			repoMock.EXPECT().AddMultipleURLs(gomock.Any(), "userID", tt.mockReqURLs).Return(tt.mockResURLs, tt.mockError).AnyTimes()
 

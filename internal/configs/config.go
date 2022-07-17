@@ -10,21 +10,59 @@ import (
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/helpers"
 )
 
+const (
+	DefaultBaseURL         = "http://localhost:8080"
+	DefaultServerAddress   = ":8080"
+	DefaultFileStoragePath = "storage.json "
+	DefaultDatabaseDSN     = "user=postgres password=postgres sslmode=disable"
+	DefaultWorkers         = 10
+	DefaultWorkersBuffer   = 100
+)
+
+// Config contains app configuration.
 type Config struct {
 	// BaseURL - base app address
-	BaseURL string `env:"BASE_URL" envDefault:"http://localhost:8080"`
+	baseURL string `env:"BASE_URL"`
 	// ServerAddress - server address
-	ServerAddress string `env:"SERVER_ADDRESS" envDefault:":8080"`
-	// FileStoragePath - path to the filebase
-	FileStoragePath string `env:"FILE_STORAGE_PATH" envDefault:"storage.json"`
+	serverAddress string `env:"SERVER_ADDRESS"`
+	// FileStoragePath - path to the file base
+	fileStoragePath string `env:"FILE_STORAGE_PATH"`
 	// DatabaseDSN - path to the database
-	DatabaseDSN string `env:"DATABASE_DSN"`
+	databaseDSN string `env:"DATABASE_DSN"`
 	// Key - encryption key
-	Key []byte
+	key []byte
 	// Workers - number of workers
-	Workers int `env:"WORKERS" envDefault:"10"`
+	workers int `env:"WORKERS"`
 	// WorkersBuffer - buffer size value
-	WorkersBuffer int `env:"WORKERS_BUFFER" envDefault:"100"`
+	workersBuffer int `env:"WORKERS_BUFFER"`
+}
+
+func (c *Config) BaseURL() string {
+	return c.baseURL
+}
+
+func (c *Config) ServerAddress() string {
+	return c.serverAddress
+}
+
+func (c *Config) FileStoragePath() string {
+	return c.fileStoragePath
+}
+
+func (c *Config) DatabaseDSN() string {
+	return c.databaseDSN
+}
+
+func (c *Config) Key() []byte {
+	return c.key
+}
+
+func (c *Config) Workers() int {
+	return c.workers
+}
+
+func (c *Config) WorkersBuffer() int {
+	return c.workersBuffer
 }
 
 // The function checks for the presence of a flag. f - flag values
@@ -32,15 +70,26 @@ func checkExists(f string) bool {
 	return flag.Lookup(f) == nil
 }
 
+func defaultConfig() Config {
+	return Config{
+		baseURL:         DefaultBaseURL,
+		serverAddress:   DefaultServerAddress,
+		fileStoragePath: DefaultFileStoragePath,
+		databaseDSN:     DefaultDatabaseDSN,
+		workers:         DefaultWorkers,
+		workersBuffer:   DefaultWorkersBuffer,
+	}
+}
+
 func New() Config {
-	var c Config
+	c := defaultConfig()
 
 	random, err := helpers.GenerateRandom(16)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	c.Key = random
+	c.key = random
 
 	err = env.Parse(&c)
 	if err != nil {
@@ -48,27 +97,27 @@ func New() Config {
 	}
 
 	if checkExists("b") {
-		flag.StringVar(&c.BaseURL, "b", c.BaseURL, "BaseUrl")
+		flag.StringVar(&c.baseURL, "b", DefaultBaseURL, "BaseUrl")
 	}
 
 	if checkExists("a") {
-		flag.StringVar(&c.ServerAddress, "a", c.ServerAddress, "ServerAddress")
+		flag.StringVar(&c.serverAddress, "a", DefaultServerAddress, "ServerAddress")
 	}
 
 	if checkExists("f") {
-		flag.StringVar(&c.FileStoragePath, "f", c.FileStoragePath, "FileStoragePath")
+		flag.StringVar(&c.fileStoragePath, "f", DefaultFileStoragePath, "FileStoragePath")
 	}
 
 	if checkExists("d") {
-		flag.StringVar(&c.DatabaseDSN, "d", c.DatabaseDSN, "DatabaseDSN")
+		flag.StringVar(&c.databaseDSN, "d", DefaultDatabaseDSN, "DatabaseDSN")
 	}
 
 	if checkExists("w") {
-		flag.IntVar(&c.Workers, "w", c.Workers, "Workers")
+		flag.IntVar(&c.workers, "w", DefaultWorkers, "Workers")
 	}
 
 	if checkExists("wb") {
-		flag.IntVar(&c.WorkersBuffer, "wb", c.WorkersBuffer, "WorkersBuffer")
+		flag.IntVar(&c.workersBuffer, "wb", DefaultWorkersBuffer, "WorkersBuffer")
 	}
 
 	flag.Parse()
