@@ -12,7 +12,6 @@ import (
 const (
 	DefaultBaseURL         = "http://localhost:8080"
 	DefaultServerAddress   = ":8080"
-	DefaultDatabaseDSN     = "user=postgres password=postgres sslmode=disable"
 	DefaultFileStoragePath = "storage.json "
 	DefaultWorkers         = 10
 	DefaultWorkersBuffer   = 100
@@ -46,7 +45,6 @@ func defaultConfig() Config {
 		BaseURL:         DefaultBaseURL,
 		ServerAddress:   DefaultServerAddress,
 		FileStoragePath: DefaultFileStoragePath,
-		DatabaseDSN:     DefaultDatabaseDSN,
 		Workers:         DefaultWorkers,
 		WorkersBuffer:   DefaultWorkersBuffer,
 	}
