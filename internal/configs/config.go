@@ -4,7 +4,6 @@ package configs
 import (
 	"flag"
 	"log"
-	"sync"
 
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/helpers"
 	"github.com/caarlos0/env/v6"
@@ -13,6 +12,7 @@ import (
 const (
 	DefaultBaseURL         = "http://localhost:8080"
 	DefaultServerAddress   = ":8080"
+	DefaultDatabaseDSN     = "user=postgres password=postgres sslmode=disable"
 	DefaultFileStoragePath = "storage.json "
 	DefaultWorkers         = 10
 	DefaultWorkersBuffer   = 100
@@ -21,52 +21,19 @@ const (
 // Config contains app configuration.
 type Config struct {
 	// BaseURL - base app address
-	baseURL string `env:"BASE_URL"`
+	BaseURL string `env:"BASE_URL"`
 	// ServerAddress - server address
-	serverAddress string `env:"SERVER_ADDRESS"`
+	ServerAddress string `env:"SERVER_ADDRESS"`
 	// FileStoragePath - path to the file base
-	fileStoragePath string `env:"FILE_STORAGE_PATH"`
+	FileStoragePath string `env:"FILE_STORAGE_PATH"`
 	// DatabaseDSN - path to the database
-	databaseDSN string `env:"DATABASE_DSN"`
+	DatabaseDSN string `env:"DATABASE_DSN"`
 	// Key - encryption key
-	key []byte
+	Key []byte
 	// Workers - number of workers
-	workers int `env:"WORKERS"`
+	Workers int `env:"WORKERS"`
 	// WorkersBuffer - buffer size value
-	workersBuffer int `env:"WORKERS_BUFFER"`
-}
-
-var (
-	config Config
-	once   sync.Once
-)
-
-func (c *Config) BaseURL() string {
-	return c.baseURL
-}
-
-func (c *Config) ServerAddress() string {
-	return c.serverAddress
-}
-
-func (c *Config) FileStoragePath() string {
-	return c.fileStoragePath
-}
-
-func (c *Config) DatabaseDSN() string {
-	return c.databaseDSN
-}
-
-func (c *Config) Key() []byte {
-	return c.key
-}
-
-func (c *Config) Workers() int {
-	return c.workers
-}
-
-func (c *Config) WorkersBuffer() int {
-	return c.workersBuffer
+	WorkersBuffer int `env:"WORKERS_BUFFER"`
 }
 
 // The function checks for the presence of a flag. f - flag values
@@ -75,59 +42,56 @@ func checkExists(f string) bool {
 }
 
 func defaultConfig() Config {
-	config = Config{
-		baseURL:         DefaultBaseURL,
-		serverAddress:   DefaultServerAddress,
-		fileStoragePath: DefaultFileStoragePath,
-		workers:         DefaultWorkers,
-		workersBuffer:   DefaultWorkersBuffer,
+	return Config{
+		BaseURL:         DefaultBaseURL,
+		ServerAddress:   DefaultServerAddress,
+		FileStoragePath: DefaultFileStoragePath,
+		DatabaseDSN:     DefaultDatabaseDSN,
+		Workers:         DefaultWorkers,
+		WorkersBuffer:   DefaultWorkersBuffer,
 	}
-
-	return config
 }
 
 func New() *Config {
-	once.Do(func() {
-		config = defaultConfig()
+	c := defaultConfig()
 
-		random, err := helpers.GenerateRandom(16)
-		if err != nil {
-			log.Fatal(err)
-		}
+	random, err := helpers.GenerateRandom(16)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-		config.key = random
+	c.Key = random
 
-		err = env.Parse(&config)
-		if err != nil {
-			log.Fatal(err)
-		}
+	err = env.Parse(&c)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-		if checkExists("b") {
-			flag.StringVar(&config.baseURL, "b", DefaultBaseURL, "BaseUrl")
-		}
+	if checkExists("b") {
+		flag.StringVar(&c.BaseURL, "b", c.BaseURL, "BaseUrl")
+	}
 
-		if checkExists("a") {
-			flag.StringVar(&config.serverAddress, "a", DefaultServerAddress, "ServerAddress")
-		}
+	if checkExists("a") {
+		flag.StringVar(&c.ServerAddress, "a", c.ServerAddress, "ServerAddress")
+	}
 
-		if checkExists("f") {
-			flag.StringVar(&config.fileStoragePath, "f", DefaultFileStoragePath, "FileStoragePath")
-		}
+	if checkExists("f") {
+		flag.StringVar(&c.FileStoragePath, "f", c.FileStoragePath, "FileStoragePath")
+	}
 
-		if checkExists("d") {
-			flag.StringVar(&config.databaseDSN, "d", config.databaseDSN, "DatabaseDSN")
-		}
+	if checkExists("d") {
+		flag.StringVar(&c.DatabaseDSN, "d", c.DatabaseDSN, "DatabaseDSN")
+	}
 
-		if checkExists("w") {
-			flag.IntVar(&config.workers, "w", DefaultWorkers, "Workers")
-		}
+	if checkExists("w") {
+		flag.IntVar(&c.Workers, "w", c.Workers, "Workers")
+	}
 
-		if checkExists("wb") {
-			flag.IntVar(&config.workersBuffer, "wb", DefaultWorkersBuffer, "WorkersBuffer")
-		}
+	if checkExists("wb") {
+		flag.IntVar(&c.WorkersBuffer, "wb", c.WorkersBuffer, "WorkersBuffer")
+	}
 
-		flag.Parse()
-	})
+	flag.Parse()
 
-	return &config
+	return &c
 }

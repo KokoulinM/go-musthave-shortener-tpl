@@ -37,14 +37,14 @@ func main() {
 
 	var repo handlers.Repository
 
-	wp := workers.New(ctx, cfg.Workers(), cfg.WorkersBuffer())
+	wp := workers.New(ctx, cfg.Workers, cfg.WorkersBuffer)
 
 	go func() {
 		wp.Run(ctx)
 	}()
 	defer wp.Stop()
-	if cfg.DatabaseDSN() != "" {
-		conn, err := postgres.Conn("postgres", cfg.DatabaseDSN())
+	if cfg.DatabaseDSN != "" {
+		conn, err := postgres.Conn("postgres", cfg.DatabaseDSN)
 		if err != nil {
 			log.Printf("Unable to connect to the database: %s", err.Error())
 		}
@@ -55,26 +55,26 @@ func main() {
 			log.Printf("Unable to create database struct: %s", err.Error())
 		}
 
-		repo = postgres.NewDatabaseRepository(cfg.BaseURL(), conn)
+		repo = postgres.NewDatabaseRepository(cfg.BaseURL, conn)
 	} else {
-		repo = filebase.NewFileRepository(ctx, cfg.FileStoragePath(), cfg.BaseURL())
+		repo = filebase.NewFileRepository(ctx, cfg.FileStoragePath, cfg.BaseURL)
 	}
 
 	g, ctx := errgroup.WithContext(ctx)
 
-	h := handlers.New(repo, cfg.BaseURL(), wp)
+	h := handlers.New(repo, cfg.BaseURL, wp)
 
 	mux := router.New(h)
 
 	g.Go(func() error {
-		httpServer = server.New(cfg.ServerAddress(), cfg.Key(), mux)
+		httpServer = server.New(cfg.ServerAddress, cfg.Key, mux)
 
 		err := httpServer.Start()
 		if err != nil {
 			return err
 		}
 
-		log.Printf("httpServer starting at: %v", cfg.ServerAddress())
+		log.Printf("httpServer starting at: %v", cfg.ServerAddress)
 
 		return nil
 	})
