@@ -38,7 +38,7 @@ type Config struct {
 }
 
 var (
-	config *Config
+	config Config
 	once   sync.Once
 )
 
@@ -76,7 +76,7 @@ func checkExists(f string) bool {
 }
 
 func defaultConfig() Config {
-	return Config{
+	config = Config{
 		baseURL:         DefaultBaseURL,
 		serverAddress:   DefaultServerAddress,
 		fileStoragePath: DefaultFileStoragePath,
@@ -84,11 +84,13 @@ func defaultConfig() Config {
 		workers:         DefaultWorkers,
 		workersBuffer:   DefaultWorkersBuffer,
 	}
+
+	return config
 }
 
 func New() *Config {
 	once.Do(func() {
-		config := defaultConfig()
+		config = defaultConfig()
 
 		random, err := helpers.GenerateRandom(16)
 		if err != nil {
@@ -129,5 +131,5 @@ func New() *Config {
 		flag.Parse()
 	})
 
-	return config
+	return &config
 }
