@@ -10,11 +10,12 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/go-chi/chi/v5"
+
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/handlers/middlewares"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/models"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/shortener"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/workers"
-	"github.com/go-chi/chi/v5"
 )
 
 // @Title Shortener API
@@ -132,7 +133,7 @@ func (h *Handlers) RetrieveShortURL(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Add("Location", url)
 
-	http.Redirect(w, r, "url", http.StatusTemporaryRedirect)
+	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 }
 
 // CreateShortURL godoc
