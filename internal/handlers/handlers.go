@@ -470,7 +470,7 @@ func (h *Handlers) PingDB(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func ExampleHandler_RetrieveShortURL() {
+func ExampleHandlerRetrieveShortURL() {
 	rtr := chi.NewRouter()
 	var repo Repository
 	wp := workers.New(context.Background(), 10, 100)
@@ -478,7 +478,7 @@ func ExampleHandler_RetrieveShortURL() {
 	rtr.Post("/", h.RetrieveShortURL)
 }
 
-func ExampleHandler_CreateShortURL() {
+func ExampleHandlerCreateShortURL() {
 	rtr := chi.NewRouter()
 	var repo Repository
 	wp := workers.New(context.Background(), 10, 100)
@@ -486,7 +486,7 @@ func ExampleHandler_CreateShortURL() {
 	rtr.Post("/", h.CreateShortURL)
 }
 
-func ExampleHandler_ShortenURL() {
+func ExampleHandlerShortenURL() {
 	rtr := chi.NewRouter()
 	var repo Repository
 	wp := workers.New(context.Background(), 10, 100)
@@ -494,7 +494,7 @@ func ExampleHandler_ShortenURL() {
 	rtr.Post("/", h.ShortenURL)
 }
 
-func ExampleHandler_GetUserURLs() {
+func ExampleHandlerGetUserURLs() {
 	rtr := chi.NewRouter()
 	var repo Repository
 	wp := workers.New(context.Background(), 10, 100)
@@ -502,7 +502,7 @@ func ExampleHandler_GetUserURLs() {
 	rtr.Post("/", h.GetUserURLs)
 }
 
-func ExampleHandler_DeleteBatch() {
+func ExampleHandlerDeleteBatch() {
 	rtr := chi.NewRouter()
 	var repo Repository
 	wp := workers.New(context.Background(), 10, 100)
@@ -510,7 +510,7 @@ func ExampleHandler_DeleteBatch() {
 	rtr.Post("/", h.DeleteBatch)
 }
 
-func ExampleHandler_CreateBatch() {
+func ExampleHandlerCreateBatch() {
 	rtr := chi.NewRouter()
 	var repo Repository
 	wp := workers.New(context.Background(), 10, 100)
