@@ -10,12 +10,11 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/go-chi/chi/v5"
-
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/handlers/middlewares"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/models"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/shortener"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/workers"
+	"github.com/go-chi/chi/v5"
 )
 
 // @Title Shortener API
@@ -133,7 +132,7 @@ func (h *Handlers) RetrieveShortURL(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Add("Location", url)
 
-	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+	http.Redirect(w, r, "url", http.StatusTemporaryRedirect)
 }
 
 // CreateShortURL godoc
@@ -215,7 +214,7 @@ func (h *Handlers) CreateShortURL(w http.ResponseWriter, r *http.Request) {
 // @Accept  json
 // @Produce json
 // @Param url_data body map[string]string{} true "Contains a JSON with an url"
-// @Success 201 {string} string "short url"	
+// @Success 201 {string} string "short url"
 // @Failure 400 {string} string "the URL property is missing"
 // @Failure 409 {string} string "the same URL already exists"
 // @Failure 500 {string} string "an unexpected error when unmarshaling JSON"
@@ -469,4 +468,52 @@ func (h *Handlers) PingDB(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
+}
+
+func ExampleHandler_RetrieveShortURL() {
+	rtr := chi.NewRouter()
+	var repo Repository
+	wp := workers.New(context.Background(), 10, 100)
+	h := New(repo, ":8080", wp)
+	rtr.Post("/", h.RetrieveShortURL)
+}
+
+func ExampleHandler_CreateShortURL() {
+	rtr := chi.NewRouter()
+	var repo Repository
+	wp := workers.New(context.Background(), 10, 100)
+	h := New(repo, ":8080", wp)
+	rtr.Post("/", h.CreateShortURL)
+}
+
+func ExampleHandler_ShortenURL() {
+	rtr := chi.NewRouter()
+	var repo Repository
+	wp := workers.New(context.Background(), 10, 100)
+	h := New(repo, ":8080", wp)
+	rtr.Post("/", h.ShortenURL)
+}
+
+func ExampleHandler_GetUserURLs() {
+	rtr := chi.NewRouter()
+	var repo Repository
+	wp := workers.New(context.Background(), 10, 100)
+	h := New(repo, ":8080", wp)
+	rtr.Post("/", h.GetUserURLs)
+}
+
+func ExampleHandler_DeleteBatch() {
+	rtr := chi.NewRouter()
+	var repo Repository
+	wp := workers.New(context.Background(), 10, 100)
+	h := New(repo, ":8080", wp)
+	rtr.Post("/", h.DeleteBatch)
+}
+
+func ExampleHandler_CreateBatch() {
+	rtr := chi.NewRouter()
+	var repo Repository
+	wp := workers.New(context.Background(), 10, 100)
+	h := New(repo, ":8080", wp)
+	rtr.Post("/", h.CreateBatch)
 }

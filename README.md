@@ -29,3 +29,9 @@ go install github.com/swaggo/swag/cmd/swag@latest
 
 swag init -g internal/handlers/handlers.go
 ````
+
+# Profiling
+
+````
+go test -bench=. -cpuprofile=cpu.out 
+````
