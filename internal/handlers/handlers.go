@@ -475,7 +475,7 @@ func ExampleHandlerRetrieveShortURL() {
 	var repo Repository
 	wp := workers.New(context.Background(), 10, 100)
 	h := New(repo, ":8080", wp)
-	rtr.Post("/", h.RetrieveShortURL)
+	rtr.Get("/{id}", h.RetrieveShortURL)
 }
 
 func ExampleHandlerCreateShortURL() {
@@ -491,7 +491,7 @@ func ExampleHandlerShortenURL() {
 	var repo Repository
 	wp := workers.New(context.Background(), 10, 100)
 	h := New(repo, ":8080", wp)
-	rtr.Post("/", h.ShortenURL)
+	rtr.Post("/api/shorten", h.ShortenURL)
 }
 
 func ExampleHandlerGetUserURLs() {
@@ -499,7 +499,7 @@ func ExampleHandlerGetUserURLs() {
 	var repo Repository
 	wp := workers.New(context.Background(), 10, 100)
 	h := New(repo, ":8080", wp)
-	rtr.Post("/", h.GetUserURLs)
+	rtr.Get("/api/user/urls", h.GetUserURLs)
 }
 
 func ExampleHandlerDeleteBatch() {
@@ -507,7 +507,7 @@ func ExampleHandlerDeleteBatch() {
 	var repo Repository
 	wp := workers.New(context.Background(), 10, 100)
 	h := New(repo, ":8080", wp)
-	rtr.Post("/", h.DeleteBatch)
+	rtr.Delete("/api/user/urls", h.DeleteBatch)
 }
 
 func ExampleHandlerCreateBatch() {
@@ -515,5 +515,5 @@ func ExampleHandlerCreateBatch() {
 	var repo Repository
 	wp := workers.New(context.Background(), 10, 100)
 	h := New(repo, ":8080", wp)
-	rtr.Post("/", h.CreateBatch)
+	rtr.Post("/api/shorten/batch", h.CreateBatch)
 }
