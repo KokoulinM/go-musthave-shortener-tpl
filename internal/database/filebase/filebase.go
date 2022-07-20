@@ -1,3 +1,4 @@
+// Package filebase provides data storage in a file
 package filebase
 
 import (

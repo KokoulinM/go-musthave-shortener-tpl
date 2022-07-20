@@ -1,3 +1,4 @@
+// Package middlewares provide middlewares for the app router
 package middlewares
 
 import (

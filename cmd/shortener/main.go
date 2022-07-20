@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"sort"
 	"syscall"
 	"time"
 
@@ -95,6 +96,10 @@ func main() {
 	if httpServer != nil {
 		_ = httpServer.Shutdown(shutdownCtx)
 	}
+
+	sl := []string{"foo", "bar", "buzz"}
+	sl = sort.StringSlice(sl) // sort.StringSlice — это не функция, а тип, выражение не отсортирует sl
+	// чтобы отсортировать, нужно сделать sort.StringSlice(sl).Sort()
 
 	err := g.Wait()
 	if err != nil {
