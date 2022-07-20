@@ -15,6 +15,7 @@ psql postgres
 ````
 Check coverage
 go test ./... -v -short -p 1 -cover
+go test ./...
 ````
 # Linting
 
@@ -27,4 +28,10 @@ golangci-lint run
 go install github.com/swaggo/swag/cmd/swag@latest 
 
 swag init -g internal/handlers/handlers.go
+````
+
+# Profiling
+
+````
+go test -bench=. -cpuprofile=cpu.out 
 ````

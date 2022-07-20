@@ -1,3 +1,4 @@
+// Models for working with the URL entity
 package models
 
 type ShortURL = string

@@ -1,17 +1,74 @@
+definitions:
+  handlers.RequestGetURLs:
+    properties:
+      correlation_id:
+        type: string
+      original_url:
+        type: string
+    type: object
+  handlers.ResponseGetURL:
+    properties:
+      original_url:
+        type: string
+      short_url:
+        type: string
+    type: object
+  handlers.ResponseGetURLs:
+    properties:
+      correlation_id:
+        type: string
+      short_url:
+        type: string
+    type: object
+host: localhost:8080
 info:
-  contact: {}
+  contact:
+    email: kokoulin92@gmail.com
   description: URL Shortener Service
   title: Shortener API
   version: "1.0"
 paths:
+  /:
+    post:
+      consumes:
+      - application/json
+      description: method to get a single long url by a short url
+      operationId: createShortURL
+      parameters:
+      - description: Contains a string with an url
+        in: body
+        name: url_data
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: short url
+          schema:
+            type: string
+        "400":
+          description: the body cannot be an empty
+          schema:
+            type: string
+        "409":
+          description: the same URL already exists
+          schema:
+            type: string
+        "500":
+          description: unexpected error when writing the response body
+          schema:
+            type: string
+      summary: method to save a single url
   /{id}:
     get:
       consumes:
       - application/json
-      description: Getting a short URL by ID
-      operationId: storageGetBucket
+      description: method to get a single long url by a short url
+      operationId: retrieveShortURL
       parameters:
-      - description: URL ID
+      - description: ShortURL
         in: path
         name: id
         required: true
@@ -35,5 +92,87 @@ paths:
           description: the parameter was deleted
           schema:
             type: string
-      summary: Getting a short URL
+      summary: method to get a single long url
+  /api/shorten:
+    post:
+      consumes:
+      - application/json
+      description: method to get a single long url by a short url
+      operationId: shortenURL
+      parameters:
+      - description: Contains a JSON with an url
+        in: body
+        name: url_data
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: short url
+          schema:
+            type: string
+        "400":
+          description: the URL property is missing
+        "409":
+          description: the same URL already exists
+        "500":
+          description: an unexpected error when unmarshaling JSON
+          schema:
+            type: string
+      summary: method to save a single url
+  /api/user/urls:
+    delete:
+      consumes:
+      - application/json
+      operationId: deleteBatch
+      parameters:
+      - description: Contains urls
+        in: body
+        name: url_data
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: ""
+        "500":
+          description: 500 Internal Server Error
+          schema:
+            type: string
+    get:
+      consumes:
+      - application/json
+      description: method to get list of urls
+      operationId: getUserURLs
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/handlers.ResponseGetURL'
+            type: array
+        "204":
+          description: no content
+          schema:
+            items:
+              type: string
+            type: array
+        "500":
+          description: an unexpected error when unmarshaling JSON
+          schema:
+            type: string
+      summary: method to get list of urls
 swagger: "2.0"
+tags:
+- description: '"Group of service status requests"'
+  name: Shortener

@@ -5,26 +5,34 @@ import (
 	"flag"
 	"log"
 
-	"github.com/caarlos0/env/v6"
-
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/helpers"
+	"github.com/caarlos0/env/v6"
 )
 
+const (
+	DefaultBaseURL         = "http://localhost:8080"
+	DefaultServerAddress   = ":8080"
+	DefaultFileStoragePath = "storage.json "
+	DefaultWorkers         = 10
+	DefaultWorkersBuffer   = 100
+)
+
+// Config contains app configuration.
 type Config struct {
 	// BaseURL - base app address
-	BaseURL string `env:"BASE_URL" envDefault:"http://localhost:8080"`
+	BaseURL string `env:"BASE_URL"`
 	// ServerAddress - server address
-	ServerAddress string `env:"SERVER_ADDRESS" envDefault:":8080"`
-	// FileStoragePath - path to the filebase
-	FileStoragePath string `env:"FILE_STORAGE_PATH" envDefault:"storage.json"`
+	ServerAddress string `env:"SERVER_ADDRESS"`
+	// FileStoragePath - path to the file base
+	FileStoragePath string `env:"FILE_STORAGE_PATH"`
 	// DatabaseDSN - path to the database
 	DatabaseDSN string `env:"DATABASE_DSN"`
 	// Key - encryption key
 	Key []byte
 	// Workers - number of workers
-	Workers int `env:"WORKERS" envDefault:"10"`
+	Workers int `env:"WORKERS"`
 	// WorkersBuffer - buffer size value
-	WorkersBuffer int `env:"WORKERS_BUFFER" envDefault:"100"`
+	WorkersBuffer int `env:"WORKERS_BUFFER"`
 }
 
 // The function checks for the presence of a flag. f - flag values
@@ -32,8 +40,18 @@ func checkExists(f string) bool {
 	return flag.Lookup(f) == nil
 }
 
-func New() Config {
-	var c Config
+func defaultConfig() Config {
+	return Config{
+		BaseURL:         DefaultBaseURL,
+		ServerAddress:   DefaultServerAddress,
+		FileStoragePath: DefaultFileStoragePath,
+		Workers:         DefaultWorkers,
+		WorkersBuffer:   DefaultWorkersBuffer,
+	}
+}
+
+func New() *Config {
+	c := defaultConfig()
 
 	random, err := helpers.GenerateRandom(16)
 	if err != nil {
@@ -73,5 +91,5 @@ func New() Config {
 
 	flag.Parse()
 
-	return c
+	return &c
 }

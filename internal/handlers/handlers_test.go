@@ -21,9 +21,7 @@ import (
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/workers"
 )
 
-func router(repo Repository, baseURL string, wp *workers.WorkerPool) *chi.Mux {
-	h := New(repo, baseURL, wp)
-
+func router(h *Handlers) *chi.Mux {
 	router := chi.NewRouter()
 
 	router.Use(middleware.Logger)
@@ -121,7 +119,9 @@ func TestCreateShortURL(t *testing.T) {
 
 			repoMock := NewMockRepository(ctrl)
 
-			r := router(repoMock, cfg.BaseURL, wp)
+			h := New(repoMock, cfg.BaseURL, wp)
+
+			r := router(h)
 
 			repoMock.EXPECT().AddURL(gomock.Any(), tt.body, tt.mockURL, "userID").Return(tt.mockError).AnyTimes()
 
@@ -141,9 +141,7 @@ func TestCreateShortURL(t *testing.T) {
 
 func TestRetrieveShortURL(t *testing.T) {
 	type want struct {
-		code        int
-		response    string
-		contentType string
+		code int
 	}
 
 	tests := []struct {
@@ -201,7 +199,9 @@ func TestRetrieveShortURL(t *testing.T) {
 
 			repoMock := NewMockRepository(ctrl)
 
-			r := router(repoMock, cfg.BaseURL, wp)
+			h := New(repoMock, cfg.BaseURL, wp)
+
+			r := router(h)
 
 			repoMock.EXPECT().GetURL(gomock.Any(), tt.mockID).Return(tt.mockURL, tt.mockError).AnyTimes()
 
@@ -214,9 +214,8 @@ func TestRetrieveShortURL(t *testing.T) {
 
 func TestShortenURL(t *testing.T) {
 	type want struct {
-		code        int
-		response    string
-		contentType string
+		code     int
+		response string
 	}
 
 	tests := []struct {
@@ -287,7 +286,9 @@ func TestShortenURL(t *testing.T) {
 
 			repoMock := NewMockRepository(ctrl)
 
-			r := router(repoMock, cfg.BaseURL, wp)
+			h := New(repoMock, cfg.BaseURL, wp)
+
+			r := router(h)
 
 			url := URL{}
 
@@ -311,9 +312,8 @@ func TestShortenURL(t *testing.T) {
 
 func TestGetUserURLs(t *testing.T) {
 	type want struct {
-		code        int
-		response    string
-		contentType string
+		code     int
+		response string
 	}
 
 	tests := []struct {
@@ -359,7 +359,9 @@ func TestGetUserURLs(t *testing.T) {
 
 			repoMock := NewMockRepository(ctrl)
 
-			r := router(repoMock, cfg.BaseURL, wp)
+			h := New(repoMock, cfg.BaseURL, wp)
+
+			r := router(h)
 
 			repoMock.EXPECT().GetUserURLs(gomock.Any(), "userID").Return(tt.mockURLs, tt.mockError).AnyTimes()
 
@@ -379,9 +381,8 @@ func TestGetUserURLs(t *testing.T) {
 
 func TestDeleteBatch(t *testing.T) {
 	type want struct {
-		code        int
-		response    string
-		contentType string
+		code     int
+		response string
 	}
 
 	tests := []struct {
@@ -429,7 +430,9 @@ func TestDeleteBatch(t *testing.T) {
 
 			repoMock := NewMockRepository(ctrl)
 
-			r := router(repoMock, cfg.BaseURL, wp)
+			h := New(repoMock, cfg.BaseURL, wp)
+
+			r := router(h)
 
 			repoMock.EXPECT().DeleteMultipleURLs(gomock.Any(), "userID", tt.mockURLs).Return(tt.mockError).AnyTimes()
 
@@ -449,9 +452,8 @@ func TestDeleteBatch(t *testing.T) {
 
 func TestCreateBatch(t *testing.T) {
 	type want struct {
-		code        int
-		response    string
-		contentType string
+		code     int
+		response string
 	}
 
 	tests := []struct {
@@ -491,7 +493,9 @@ func TestCreateBatch(t *testing.T) {
 
 			repoMock := NewMockRepository(ctrl)
 
-			r := router(repoMock, cfg.BaseURL, wp)
+			h := New(repoMock, cfg.BaseURL, wp)
+
+			r := router(h)
 
 			repoMock.EXPECT().AddMultipleURLs(gomock.Any(), "userID", tt.mockReqURLs).Return(tt.mockResURLs, tt.mockError).AnyTimes()
 

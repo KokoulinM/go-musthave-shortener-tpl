@@ -13,6 +13,7 @@ type gzipWriter struct {
 	Writer io.Writer
 }
 
+// GzipMiddleware middleware the returned writer are compressed and written to w.
 func GzipMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.Contains(r.Header.Get("Content-Encoding"), "gzip") {

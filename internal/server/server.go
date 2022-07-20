@@ -1,3 +1,4 @@
+// Package server is a convenient wrapper over ListenAndServe
 package server
 
 import (
@@ -10,12 +11,17 @@ import (
 )
 
 type Server struct {
-	addr    string
-	key     []byte
+	// addr - contains the server address
+	addr string
+	// key - encryption key
+	key []byte
+	// handler - composable HTTP services with a large set of handlers.
 	handler *chi.Mux
-	s       *http.Server
+	// s- defines parameters for running an HTTP server.
+	s *http.Server
 }
 
+// New is the server constructor
 func New(addr string, key []byte, handler *chi.Mux) *Server {
 	srv := &http.Server{
 		Addr:    addr,
@@ -30,6 +36,7 @@ func New(addr string, key []byte, handler *chi.Mux) *Server {
 	}
 }
 
+// Start is the method to start the server
 func (s *Server) Start() error {
 	err := s.s.ListenAndServe()
 	if err != nil {
@@ -39,6 +46,7 @@ func (s *Server) Start() error {
 	return nil
 }
 
+// Shutdown is the method to stop the server
 func (s *Server) Shutdown(ctx context.Context) error {
 	err := s.s.Shutdown(ctx)
 	if err != nil {

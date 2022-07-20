@@ -10,27 +10,199 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "contact": {},
+        "contact": {
+            "email": "kokoulin92@gmail.com"
+        },
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/{id}": {
-            "get": {
-                "description": "Getting a short URL by ID",
+        "/": {
+            "post": {
+                "description": "method to get a single long url by a short url",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Getting a short URL",
-                "operationId": "storageGetBucket",
+                "summary": "method to save a single url",
+                "operationId": "createShortURL",
+                "parameters": [
+                    {
+                        "description": "Contains a string with an url",
+                        "name": "url_data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "short url",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "the body cannot be an empty",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "409": {
+                        "description": "the same URL already exists",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "unexpected error when writing the response body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/shorten": {
+            "post": {
+                "description": "method to get a single long url by a short url",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "method to save a single url",
+                "operationId": "shortenURL",
+                "parameters": [
+                    {
+                        "description": "Contains a JSON with an url",
+                        "name": "url_data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "short url",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "the URL property is missing"
+                    },
+                    "409": {
+                        "description": "the same URL already exists"
+                    },
+                    "500": {
+                        "description": "an unexpected error when unmarshaling JSON",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/user/urls": {
+            "get": {
+                "description": "method to get list of urls",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "method to get list of urls",
+                "operationId": "getUserURLs",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/handlers.ResponseGetURL"
+                            }
+                        }
+                    },
+                    "204": {
+                        "description": "no content",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "an unexpected error when unmarshaling JSON",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "operationId": "deleteBatch",
+                "parameters": [
+                    {
+                        "description": "Contains urls",
+                        "name": "url_data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": ""
+                    },
+                    "500": {
+                        "description": "500 Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/{id}": {
+            "get": {
+                "description": "method to get a single long url by a short url",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "method to get a single long url",
+                "operationId": "retrieveShortURL",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "URL ID",
+                        "description": "ShortURL",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -64,13 +236,54 @@ const docTemplate = `{
                 }
             }
         }
-    }
+    },
+    "definitions": {
+        "handlers.RequestGetURLs": {
+            "type": "object",
+            "properties": {
+                "correlation_id": {
+                    "type": "string"
+                },
+                "original_url": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.ResponseGetURL": {
+            "type": "object",
+            "properties": {
+                "original_url": {
+                    "type": "string"
+                },
+                "short_url": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.ResponseGetURLs": {
+            "type": "object",
+            "properties": {
+                "correlation_id": {
+                    "type": "string"
+                },
+                "short_url": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "description": "\"Group of service status requests\"",
+            "name": "Shortener"
+        }
+    ]
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "",
+	Host:             "localhost:8080",
 	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "Shortener API",
