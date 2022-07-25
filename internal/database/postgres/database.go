@@ -1,3 +1,4 @@
+// Package postgres provides data storage in a postgres database
 package postgres
 
 import (
