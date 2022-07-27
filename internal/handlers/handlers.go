@@ -1,3 +1,4 @@
+// Package handlers provide methods for working with the shortener
 package handlers
 
 import (

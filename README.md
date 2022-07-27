@@ -35,3 +35,9 @@ swag init -g internal/handlers/handlers.go
 ````
 go test -bench=. -cpuprofile=cpu.out 
 ````
+
+# Analyzer
+
+````
+staticcheck ./...
+````

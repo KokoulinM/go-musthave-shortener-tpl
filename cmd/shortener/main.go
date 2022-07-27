@@ -23,7 +23,17 @@ import (
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/workers"
 )
 
+var (
+	buildVersion = "N/A"
+	buildDate    = "N/A"
+	buildCommit  = "N/A"
+)
+
 func main() {
+	log.Printf("Build version: %v\n", buildVersion)
+	log.Printf("Build date: %v\n", buildDate)
+	log.Printf("Build commit: %v\n", buildCommit)
+
 	var httpServer *server.Server
 
 	ctx, cancel := context.WithCancel(context.Background())
