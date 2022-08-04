@@ -15,6 +15,7 @@ const (
 	DefaultFileStoragePath = "storage.json "
 	DefaultWorkers         = 10
 	DefaultWorkersBuffer   = 100
+	DefaultEnableHttps     = false
 )
 
 // Config contains app configuration.
@@ -32,7 +33,8 @@ type Config struct {
 	// Workers - number of workers
 	Workers int `env:"WORKERS"`
 	// WorkersBuffer - buffer size value
-	WorkersBuffer int `env:"WORKERS_BUFFER"`
+	WorkersBuffer int  `env:"WORKERS_BUFFER"`
+	EnableHttps   bool `env:"ENABLE_HTTPS"`
 }
 
 // The function checks for the presence of a flag. f - flag values
@@ -47,6 +49,7 @@ func defaultConfig() Config {
 		FileStoragePath: DefaultFileStoragePath,
 		Workers:         DefaultWorkers,
 		WorkersBuffer:   DefaultWorkersBuffer,
+		EnableHttps:     DefaultEnableHttps,
 	}
 }
 
@@ -87,6 +90,10 @@ func New() *Config {
 
 	if checkExists("wb") {
 		flag.IntVar(&c.WorkersBuffer, "wb", c.WorkersBuffer, "WorkersBuffer")
+	}
+
+	if checkExists("s") {
+		flag.BoolVar(&c.EnableHttps, "s", c.EnableHttps, "EnableHttps")
 	}
 
 	flag.Parse()
