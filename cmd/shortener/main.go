@@ -18,6 +18,7 @@ import (
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/database/filebase"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/database/postgres"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/handlers"
+	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/helpers/certificate"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/router"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/server"
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/workers"
@@ -33,6 +34,8 @@ func main() {
 	log.Printf("Build version: %v\n", buildVersion)
 	log.Printf("Build date: %v\n", buildDate)
 	log.Printf("Build commit: %v\n", buildCommit)
+
+	certificate.Generate()
 
 	var httpServer *server.Server
 
@@ -79,7 +82,14 @@ func main() {
 	g.Go(func() error {
 		httpServer = server.New(cfg.ServerAddress, cfg.Key, mux)
 
-		err := httpServer.Start()
+		var err error
+
+		if cfg.EnableHttps {
+			err = httpServer.StartTLS("cert.pem", "key.pem")
+		} else {
+			err = httpServer.Start()
+		}
+		
 		if err != nil {
 			return err
 		}
