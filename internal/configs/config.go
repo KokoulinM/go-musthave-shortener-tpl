@@ -2,8 +2,11 @@
 package configs
 
 import (
+	"encoding/json"
 	"flag"
+	"io/ioutil"
 	"log"
+	"os"
 
 	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/helpers"
 	"github.com/caarlos0/env/v6"
@@ -21,20 +24,21 @@ const (
 // Config contains app configuration.
 type Config struct {
 	// BaseURL - base app address
-	BaseURL string `env:"BASE_URL"`
+	BaseURL string `env:"BASE_URL" json:"BASE_URL"`
 	// ServerAddress - server address
-	ServerAddress string `env:"SERVER_ADDRESS"`
+	ServerAddress string `env:"SERVER_ADDRESS" json:"SERVER_ADDRESS"`
 	// FileStoragePath - path to the file base
-	FileStoragePath string `env:"FILE_STORAGE_PATH"`
+	FileStoragePath string `env:"FILE_STORAGE_PATH" json:"FILE_STORAGE_PATH"`
 	// DatabaseDSN - path to the database
-	DatabaseDSN string `env:"DATABASE_DSN"`
+	DatabaseDSN string `env:"DATABASE_DSN" json:"DATABASE_DSN"`
 	// Key - encryption key
 	Key []byte
 	// Workers - number of workers
 	Workers int `env:"WORKERS"`
 	// WorkersBuffer - buffer size value
-	WorkersBuffer int  `env:"WORKERS_BUFFER"`
-	EnableHttps   bool `env:"ENABLE_HTTPS"`
+	WorkersBuffer int    `env:"WORKERS_BUFFER"`
+	EnableHttps   bool   `env:"ENABLE_HTTPS" json:"ENABLE_HTTPS"`
+	Config        string `env:"CONFIG"`
 }
 
 // The function checks for the presence of a flag. f - flag values
@@ -53,6 +57,25 @@ func defaultConfig() Config {
 	}
 }
 
+func readCfgFile(name string, cfg *Config) {
+	jsonFile, err := os.Open(name)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer jsonFile.Close()
+
+	byteValue, err := ioutil.ReadAll(jsonFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = json.Unmarshal(byteValue, &cfg)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 func New() *Config {
 	c := defaultConfig()
 
@@ -62,6 +85,20 @@ func New() *Config {
 	}
 
 	c.Key = random
+
+	if checkExists("c") {
+		flag.StringVar(&c.Config, "s", c.Config, "Config")
+	}
+
+	cfgPath := os.Getenv("CONFIG")
+
+	if cfgPath != "" {
+		c.Config = cfgPath
+	}
+
+	if c.Config != "" {
+		readCfgFile(c.Config, &c)
+	}
 
 	err = env.Parse(&c)
 	if err != nil {
