@@ -43,7 +43,8 @@ func main() {
 	defer cancel()
 
 	interrupt := make(chan os.Signal, 1)
-	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
+	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
+
 	defer signal.Stop(interrupt)
 
 	cfg := configs.New()
@@ -89,7 +90,7 @@ func main() {
 		} else {
 			err = httpServer.Start()
 		}
-		
+
 		if err != nil {
 			return err
 		}
@@ -101,6 +102,7 @@ func main() {
 
 	select {
 	case <-interrupt:
+		log.Println("Stop server")
 		break
 	case <-ctx.Done():
 		break
@@ -119,6 +121,7 @@ func main() {
 	err := g.Wait()
 	if err != nil {
 		log.Printf("server returning an error: %v", err)
-		os.Exit(2)
 	}
+
+	log.Println("Server Shutdown gracefully")
 }
