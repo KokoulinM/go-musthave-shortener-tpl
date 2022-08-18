@@ -11,7 +11,13 @@ func TestShorterURL(t *testing.T) {
 		args args
 		want string
 	}{
-		{},
+		{
+			name: "Test #1",
+			args: args{
+				longURL: "123",
+			},
+			want: "QL0AFWMIX8NRZTKeof9cXsvbvu8=",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
