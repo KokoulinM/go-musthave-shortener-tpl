@@ -6,7 +6,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/models"
+	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/models"
 )
 
 // MockRepository is a mock of Repository interface.

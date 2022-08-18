@@ -14,13 +14,13 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/configs"
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/database/filebase"
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/database/postgres"
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/handlers"
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/router"
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/server"
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/workers"
+	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/configs"
+	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/database/filebase"
+	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/database/postgres"
+	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/handlers"
+	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/router"
+	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/server"
+	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/workers"
 )
 
 var (

@@ -6,9 +6,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/configs"
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/workers"
 	"github.com/golang/mock/gomock"
+	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/configs"
+	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/workers"
 )
 
 func BenchmarkHandlers_RetrieveShortURL(b *testing.B) {

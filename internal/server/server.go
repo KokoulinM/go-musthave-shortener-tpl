@@ -7,7 +7,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/handlers/middlewares"
+	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/handlers/middlewares"
 )
 
 type Server struct {

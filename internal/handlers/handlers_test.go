@@ -11,14 +11,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/handlers/middlewares"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/golang/mock/gomock"
+	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/handlers/middlewares"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/configs"
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/workers"
+	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/configs"
+	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/workers"
 )
 
 func router(h *Handlers) *chi.Mux {
