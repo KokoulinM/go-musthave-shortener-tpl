@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-func Generate() {
+func Generate() error {
 	// создаём шаблон сертификата
 	cert := &x509.Certificate{
 		// указываем уникальный номер сертификата
@@ -39,7 +39,7 @@ func Generate() {
 	}
 
 	// создаём новый приватный RSA-ключ длиной 4096 бит
-	// обратите внимание, что для генерации ключа и сертификата 
+	// обратите внимание, что для генерации ключа и сертификата
 	// используется rand.Reader в качестве источника случайных данных
 	privateKey, err := rsa.GenerateKey(rand.Reader, 4096)
 	if err != nil {
@@ -52,19 +52,25 @@ func Generate() {
 		log.Fatal(err)
 	}
 
-	// кодируем сертификат и ключ в формате PEM, который 
+	// кодируем сертификат и ключ в формате PEM, который
 	// используется для хранения и обмена криптографическими ключами
 	var certPEM bytes.Buffer
-	pem.Encode(&certPEM, &pem.Block{
+	err = pem.Encode(&certPEM, &pem.Block{
 		Type:  "CERTIFICATE",
 		Bytes: certBytes,
 	})
+	if err != nil {
+		return err
+	}
 
 	var privateKeyPEM bytes.Buffer
-	pem.Encode(&privateKeyPEM, &pem.Block{
+	err = pem.Encode(&privateKeyPEM, &pem.Block{
 		Type:  "RSA PRIVATE KEY",
 		Bytes: x509.MarshalPKCS1PrivateKey(privateKey),
 	})
+	if err != nil {
+		return err
+	}
 
 	if err := os.WriteFile("cert.pem", certPEM.Bytes(), 0644); err != nil {
 		log.Fatal(err)
@@ -73,4 +79,6 @@ func Generate() {
 	if err := os.WriteFile("key.pem", privateKeyPEM.Bytes(), 0600); err != nil {
 		log.Fatal(err)
 	}
+
+	return nil
 }

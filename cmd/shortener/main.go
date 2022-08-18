@@ -34,7 +34,10 @@ func main() {
 	log.Printf("Build date: %v\n", buildDate)
 	log.Printf("Build commit: %v\n", buildCommit)
 
-	certificate.Generate()
+	err := certificate.Generate()
+	if err != nil {
+		log.Fatal("There was a problem when generating the certificate")
+	}
 
 	var httpServer *server.Server
 
@@ -117,7 +120,7 @@ func main() {
 		_ = httpServer.Shutdown(shutdownCtx)
 	}
 
-	err := g.Wait()
+	err = g.Wait()
 	if err != nil {
 		log.Printf("server returning an error: %v", err)
 	}
