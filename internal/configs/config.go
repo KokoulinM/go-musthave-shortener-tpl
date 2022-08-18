@@ -58,23 +58,25 @@ func defaultConfig() Config {
 	}
 }
 
-func readCfgFile(name string, cfg *Config) {
+func readCfgFile(name string, cfg *Config) error {
 	jsonFile, err := os.Open(name)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	defer jsonFile.Close()
 
 	byteValue, err := ioutil.ReadAll(jsonFile)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	err = json.Unmarshal(byteValue, &cfg)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+
+	return nil
 }
 
 func New() *Config {
@@ -87,7 +89,7 @@ func New() *Config {
 
 	c.Key = random
 
-	if checkExists("c") {
+	if checkExists("s") {
 		flag.StringVar(&c.Config, "s", c.Config, "Config")
 	}
 
@@ -98,7 +100,10 @@ func New() *Config {
 	}
 
 	if c.Config != "" {
-		readCfgFile(c.Config, &c)
+		err := readCfgFile(c.Config, &c)
+		if err != nil {
+			log.Fatal("An error occurred while reading the configuration file")
+		}
 	}
 
 	err = env.Parse(&c)
