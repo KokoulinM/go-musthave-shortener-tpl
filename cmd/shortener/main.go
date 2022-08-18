@@ -11,13 +11,13 @@ import (
 	_ "net/http/pprof"
 
 	_ "github.com/lib/pq"
-
 	"golang.org/x/sync/errgroup"
 
 	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/configs"
 	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/database/filebase"
 	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/database/postgres"
 	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/handlers"
+	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/helpers/certificate"
 	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/router"
 	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/server"
 	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/workers"
@@ -34,13 +34,19 @@ func main() {
 	log.Printf("Build date: %v\n", buildDate)
 	log.Printf("Build commit: %v\n", buildCommit)
 
+	err := certificate.Generate()
+	if err != nil {
+		log.Fatal("There was a problem when generating the certificate")
+	}
+
 	var httpServer *server.Server
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	interrupt := make(chan os.Signal, 1)
-	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
+	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
+
 	defer signal.Stop(interrupt)
 
 	cfg := configs.New()
@@ -79,7 +85,14 @@ func main() {
 	g.Go(func() error {
 		httpServer = server.New(cfg.ServerAddress, cfg.Key, mux)
 
-		err := httpServer.Start()
+		var err error
+
+		if cfg.EnableHttps {
+			err = httpServer.StartTLS("cert.pem", "key.pem")
+		} else {
+			err = httpServer.Start()
+		}
+
 		if err != nil {
 			return err
 		}
@@ -91,6 +104,7 @@ func main() {
 
 	select {
 	case <-interrupt:
+		log.Println("Stop server")
 		break
 	case <-ctx.Done():
 		break
@@ -106,9 +120,10 @@ func main() {
 		_ = httpServer.Shutdown(shutdownCtx)
 	}
 
-	err := g.Wait()
+	err = g.Wait()
 	if err != nil {
 		log.Printf("server returning an error: %v", err)
-		os.Exit(2)
 	}
+
+	log.Println("Server Shutdown gracefully")
 }

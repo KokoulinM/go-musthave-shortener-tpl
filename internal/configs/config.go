@@ -2,8 +2,11 @@
 package configs
 
 import (
+	"encoding/json"
 	"flag"
+	"io/ioutil"
 	"log"
+	"os"
 
 	"github.com/caarlos0/env/v6"
 
@@ -16,24 +19,27 @@ const (
 	DefaultFileStoragePath = "storage.json "
 	DefaultWorkers         = 10
 	DefaultWorkersBuffer   = 100
+	DefaultEnableHttps     = false
 )
 
 // Config contains app configuration.
 type Config struct {
 	// BaseURL - base app address
-	BaseURL string `env:"BASE_URL"`
+	BaseURL string `env:"BASE_URL" json:"BASE_URL"`
 	// ServerAddress - server address
-	ServerAddress string `env:"SERVER_ADDRESS"`
+	ServerAddress string `env:"SERVER_ADDRESS" json:"SERVER_ADDRESS"`
 	// FileStoragePath - path to the file base
-	FileStoragePath string `env:"FILE_STORAGE_PATH"`
+	FileStoragePath string `env:"FILE_STORAGE_PATH" json:"FILE_STORAGE_PATH"`
 	// DatabaseDSN - path to the database
-	DatabaseDSN string `env:"DATABASE_DSN"`
+	DatabaseDSN string `env:"DATABASE_DSN" json:"DATABASE_DSN"`
 	// Key - encryption key
 	Key []byte
 	// Workers - number of workers
 	Workers int `env:"WORKERS"`
 	// WorkersBuffer - buffer size value
-	WorkersBuffer int `env:"WORKERS_BUFFER"`
+	WorkersBuffer int    `env:"WORKERS_BUFFER"`
+	EnableHttps   bool   `env:"ENABLE_HTTPS" json:"ENABLE_HTTPS"`
+	Config        string `env:"CONFIG"`
 }
 
 // The function checks for the presence of a flag. f - flag values
@@ -48,7 +54,29 @@ func defaultConfig() Config {
 		FileStoragePath: DefaultFileStoragePath,
 		Workers:         DefaultWorkers,
 		WorkersBuffer:   DefaultWorkersBuffer,
+		EnableHttps:     DefaultEnableHttps,
 	}
+}
+
+func readCfgFile(name string, cfg *Config) error {
+	jsonFile, err := os.Open(name)
+	if err != nil {
+		return err
+	}
+
+	defer jsonFile.Close()
+
+	byteValue, err := ioutil.ReadAll(jsonFile)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(byteValue, &cfg)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func New() *Config {
@@ -60,6 +88,23 @@ func New() *Config {
 	}
 
 	c.Key = random
+
+	if checkExists("s") {
+		flag.StringVar(&c.Config, "s", c.Config, "Config")
+	}
+
+	cfgPath := os.Getenv("CONFIG")
+
+	if cfgPath != "" {
+		c.Config = cfgPath
+	}
+
+	if c.Config != "" {
+		err := readCfgFile(c.Config, &c)
+		if err != nil {
+			log.Fatal("An error occurred while reading the configuration file")
+		}
+	}
 
 	err = env.Parse(&c)
 	if err != nil {
@@ -88,6 +133,10 @@ func New() *Config {
 
 	if checkExists("wb") {
 		flag.IntVar(&c.WorkersBuffer, "wb", c.WorkersBuffer, "WorkersBuffer")
+	}
+
+	if checkExists("s") {
+		flag.BoolVar(&c.EnableHttps, "s", c.EnableHttps, "EnableHttps")
 	}
 
 	flag.Parse()
