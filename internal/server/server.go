@@ -46,7 +46,7 @@ func (s *Server) Start() error {
 	return nil
 }
 
-// Start is the method to start the server with tls
+// StartTLS is the method to start the server with tls
 func (s *Server) StartTLS(certFile, keyFile string) error {
 	err := s.s.ListenAndServeTLS(certFile, keyFile)
 	if err != nil {
