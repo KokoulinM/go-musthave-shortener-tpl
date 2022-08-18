@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/helpers"
 	"github.com/gofrs/uuid"
+	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/helpers"
 )
 
 func BenchmarkEncryptor_Encode(b *testing.B) {

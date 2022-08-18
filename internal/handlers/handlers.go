@@ -13,10 +13,10 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/handlers/middlewares"
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/models"
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/shortener"
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/workers"
+	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/handlers/middlewares"
+	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/models"
+	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/shortener"
+	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/workers"
 )
 
 // @Title Shortener API

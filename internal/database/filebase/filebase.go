@@ -11,8 +11,8 @@ import (
 	"os"
 	"sync"
 
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/handlers"
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/models"
+	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/handlers"
+	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/models"
 )
 
 type Repository struct {

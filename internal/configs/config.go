@@ -8,8 +8,9 @@ import (
 	"log"
 	"os"
 
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/helpers"
 	"github.com/caarlos0/env/v6"
+
+	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/helpers"
 )
 
 const (

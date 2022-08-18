@@ -1,4 +1,4 @@
-module github.com/KokoulinM/go-musthave-shortener-tpl
+module github.com/mkokoulin/go-musthave-shortener-tpl
 
 go 1.16
 

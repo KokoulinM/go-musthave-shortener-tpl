@@ -10,9 +10,9 @@ import (
 	"github.com/jackc/pgerrcode"
 	"github.com/lib/pq"
 
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/handlers"
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/models"
-	"github.com/KokoulinM/go-musthave-shortener-tpl/internal/shortener"
+	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/handlers"
+	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/models"
+	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/shortener"
 )
 
 type PostgresDatabase struct {
