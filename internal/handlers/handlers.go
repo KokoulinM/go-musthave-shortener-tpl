@@ -44,6 +44,8 @@ type Repository interface {
 	Ping(ctx context.Context) error
 	// AddMultipleURLs - adding a bunch of URLs
 	AddMultipleURLs(ctx context.Context, user models.UserID, urls ...RequestGetURLs) ([]ResponseGetURLs, error)
+	// GetStates - get a state about count of urls and users
+	GetStates(ctx context.Context) (ResponseStates, error)
 }
 
 type Handlers struct {
@@ -69,6 +71,11 @@ type RequestGetURLs struct {
 type ResponseGetURLs struct {
 	CorrelationID string `json:"correlation_id"`
 	ShortURL      string `json:"short_url"`
+}
+
+type ResponseStates struct {
+	Urls  int `json:"urls"`
+	Users int `json:"users"`
 }
 
 type ErrorWithDB struct {
@@ -460,6 +467,35 @@ func (h *Handlers) CreateBatch(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, "unexpected error when writing the response body", http.StatusInternalServerError)
 		return
+	}
+}
+
+// GetStates godoc
+// @Summary
+// @Description
+// @ID getStates
+// @Accept  json
+// @Produce json
+// @Success 200 {object} ResponseStates
+// @Failure 500 {string} string "500 Internal Server Error"
+func (h *Handlers) GetStates(w http.ResponseWriter, r *http.Request) {
+	states, err := h.repo.GetStates(r.Context())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	body, err := json.Marshal(states)
+	if err == nil {
+		w.Header().Add("Content-Type", "application/json; charset=utf-8")
+
+		w.WriteHeader(http.StatusOK)
+
+		_, err = w.Write(body)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	}
 }
 

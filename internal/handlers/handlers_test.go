@@ -35,6 +35,7 @@ func router(h *Handlers) *chi.Mux {
 		router.Get("/api/user/urls", h.GetUserURLs)
 		router.Delete("/api/user/urls", h.DeleteBatch)
 		router.Post("/api/shorten/batch", h.CreateBatch)
+		router.Get("/api/internal/states", h.GetStates)
 	})
 
 	return router
@@ -498,6 +499,64 @@ func TestCreateBatch(t *testing.T) {
 			r := router(h)
 
 			repoMock.EXPECT().AddMultipleURLs(gomock.Any(), "userID", tt.mockReqURLs).Return(tt.mockResURLs, tt.mockError).AnyTimes()
+
+			r.ServeHTTP(w, req.WithContext(context.WithValue(req.Context(), middlewares.UserIDCtxName, "userID")))
+
+			response := w.Result()
+
+			defer response.Body.Close()
+
+			body, _ := ioutil.ReadAll(response.Body)
+
+			assert.Equal(t, tt.want.code, w.Code)
+			assert.Equal(t, tt.want.response, string(body))
+		})
+	}
+}
+
+func TestHandlers_GetStates(t *testing.T) {
+	type want struct {
+		code     int
+		response string
+	}
+	tests := []struct {
+		name      string
+		query     string
+		mockState ResponseStates
+		want      want
+	}{
+		{
+			name:  "Test #1",
+			query: "/api/internal/states",
+			mockState: ResponseStates{
+				Urls:  7,
+				Users: 3,
+			},
+			want: want{
+				code:     http.StatusOK,
+				response: `{"urls":7,"users":3}`,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req, _ := http.NewRequest(http.MethodGet, tt.query, nil)
+			w := httptest.NewRecorder()
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			cfg := configs.New()
+
+			wp := workers.New(context.Background(), cfg.Workers, cfg.WorkersBuffer)
+
+			repoMock := NewMockRepository(ctrl)
+
+			h := New(repoMock, cfg.BaseURL, wp)
+
+			r := router(h)
+
+			repoMock.EXPECT().GetStates(gomock.Any()).Return(tt.mockState, nil).AnyTimes()
 
 			r.ServeHTTP(w, req.WithContext(context.WithValue(req.Context(), middlewares.UserIDCtxName, "userID")))
 

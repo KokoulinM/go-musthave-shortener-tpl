@@ -211,6 +211,21 @@ func (db *PostgresDatabase) GetUserURLs(ctx context.Context, user models.UserID)
 	return result, nil
 }
 
+func (db *PostgresDatabase) GetStates(ctx context.Context) (handlers.ResponseStates, error) {
+	sqlGetStates := `SELECT COUNT(*), COUNT(DISTINCT user_id) FROM urls;`
+
+	row := db.conn.QueryRowContext(ctx, sqlGetStates)
+
+	result := handlers.ResponseStates{}
+
+	err := row.Scan(&result.Urls, &result.Users)
+	if err != nil {
+		return result, err
+	}
+
+	return result, nil
+}
+
 func (db *PostgresDatabase) Ping(ctx context.Context) error {
 	err := db.conn.PingContext(ctx)
 	if err != nil {

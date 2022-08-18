@@ -37,9 +37,12 @@ type Config struct {
 	// Workers - number of workers
 	Workers int `env:"WORKERS"`
 	// WorkersBuffer - buffer size value
-	WorkersBuffer int    `env:"WORKERS_BUFFER"`
-	EnableHttps   bool   `env:"ENABLE_HTTPS" json:"ENABLE_HTTPS"`
-	Config        string `env:"CONFIG"`
+	WorkersBuffer int  `env:"WORKERS_BUFFER"`
+	EnableHttps   bool `env:"ENABLE_HTTPS" json:"ENABLE_HTTPS"`
+	// Config - configuration file
+	Config string `env:"CONFIG"`
+	// TrustedSubnet - available url for internal requests
+	TrustedSubnet string `env:"TRUSTED_SUBNET" json:"trusted_subnet"`
 }
 
 // The function checks for the presence of a flag. f - flag values
@@ -137,6 +140,10 @@ func New() *Config {
 
 	if checkExists("s") {
 		flag.BoolVar(&c.EnableHttps, "s", c.EnableHttps, "EnableHttps")
+	}
+
+	if checkExists("t") {
+		flag.StringVar(&c.TrustedSubnet, "t", c.TrustedSubnet, "TrustedSubnet")
 	}
 
 	flag.Parse()

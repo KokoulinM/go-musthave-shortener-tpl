@@ -80,7 +80,7 @@ func main() {
 
 	h := handlers.New(repo, cfg.BaseURL, wp)
 
-	mux := router.New(h)
+	mux := router.New(h, cfg)
 
 	g.Go(func() error {
 		httpServer = server.New(cfg.ServerAddress, cfg.Key, mux)

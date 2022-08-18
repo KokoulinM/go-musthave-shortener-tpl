@@ -142,6 +142,10 @@ func (repo *Repository) AddMultipleURLs(ctx context.Context, user models.UserID,
 	return nil, nil
 }
 
+func (repo *Repository) GetStates(ctx context.Context) (handlers.ResponseStates, error) {
+	return handlers.ResponseStates{}, nil
+}
+
 func newProducer(filename string) (*producer, error) {
 	file, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0777)
 
