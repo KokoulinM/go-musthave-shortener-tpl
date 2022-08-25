@@ -1,0 +1,96 @@
+syntax = "proto3";
+package urls;
+option go_package = "/pb";
+
+service URL {
+    rpc RetrieveShortURL(RetrieveShortURLRequest) returns (RetrieveShortURLResponse) {}
+    rpc CreateShortURL(CreateShortURLRequest) returns (CreateShortURLResponse) {}
+    rpc ShortenURL(ShortenURLRequest) returns (ShortenURLResponse) {}
+    rpc GetUserURLs(GetUserURLsRequest) returns (GetUserURLsResponse) {}
+    rpc DeleteBatch(DeleteBatchRequest) returns (DeleteBatchResponse) {}
+    rpc GetStates(GetStatesRequest) returns (GetStatesResponse) {}
+    rpc CreateBatch(CreateBatchRequest) returns (CreateBatchResponse) {}
+}
+
+message RetrieveShortURLRequest {
+  string short_url_id = 1;
+}
+
+message RetrieveShortURLResponse {
+  string redirect_url = 1;
+}
+
+message CreateShortURLRequest {
+  string user_id = 1;
+  string original_id = 2;
+}
+
+message CreateShortURLResponse {
+  string response_url = 1;
+  string status = 2;
+}
+
+message ShortenURLRequest {
+  message URL {
+    string url = 1;
+  }
+  string user_id = 1;
+  URL url = 2;
+}
+
+message ShortenURLResponse {
+  message URL {
+    string result = 1;
+  }
+  URL url = 1;
+}
+
+message GetUserURLsRequest {
+  string user_id = 1;
+}
+
+message GetUserURLsResponse {
+  message URL {
+    string short_url = 1;
+    string original_url = 2;
+  }
+  repeated URL urls = 1;
+  string status = 2;
+}
+
+message CreateBatchRequest {
+  message URL {
+    int32 correlation_id = 1;
+    string original_url = 2;
+  }
+  string user_id = 1;
+  repeated URL urls = 2;
+}
+
+message CreateBatchResponse {
+  message URL {
+    int32 correlation_id = 1;
+    string short_url = 2;
+  }
+  repeated URL urls = 1;
+  string status = 2;
+}
+
+message DeleteBatchRequest {
+  repeated string urls = 1;
+  string user_id = 2;
+}
+
+message DeleteBatchResponse {
+  string status = 1;
+}
+
+message GetStatesRequest {
+  string ip_address = 1;
+}
+
+message GetStatesResponse {
+  int32 users = 1;
+  int32 urls = 2;
+  string status = 3;
+}
