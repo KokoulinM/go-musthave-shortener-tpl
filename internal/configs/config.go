@@ -20,6 +20,7 @@ const (
 	DefaultWorkers         = 10
 	DefaultWorkersBuffer   = 100
 	DefaultEnableHttps     = false
+	DefaultGRPCPort        = 5000
 )
 
 // Config contains app configuration.
@@ -43,6 +44,7 @@ type Config struct {
 	Config string `env:"CONFIG"`
 	// TrustedSubnet - available url for internal requests
 	TrustedSubnet string `env:"TRUSTED_SUBNET" json:"trusted_subnet"`
+	GRPCPort      int    `env:"GRPC_PORT" json:"grpc_port"`
 }
 
 // The function checks for the presence of a flag. f - flag values
@@ -58,6 +60,7 @@ func defaultConfig() Config {
 		Workers:         DefaultWorkers,
 		WorkersBuffer:   DefaultWorkersBuffer,
 		EnableHttps:     DefaultEnableHttps,
+		GRPCPort:        DefaultGRPCPort,
 	}
 }
 

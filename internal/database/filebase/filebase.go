@@ -13,6 +13,7 @@ import (
 
 	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/handlers"
 	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/models"
+	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/services"
 )
 
 type Repository struct {
@@ -59,8 +60,8 @@ func FileRepository(ctx context.Context, filePath string, baseURL string) *Repos
 	return &repo
 }
 
-func NewFileRepository(ctx context.Context, filePath string, baseURL string) handlers.Repository {
-	return handlers.Repository(FileRepository(ctx, filePath, baseURL))
+func NewFileRepository(ctx context.Context, filePath string, baseURL string) services.RepositoryInterface {
+	return services.RepositoryInterface(FileRepository(ctx, filePath, baseURL))
 }
 
 type Producer interface {
@@ -130,7 +131,7 @@ func (repo *Repository) GetUserURLs(ctx context.Context, userID models.UserID) (
 	return result, nil
 }
 
-func (repo *Repository) DeleteMultipleURLs(ctx context.Context, user models.UserID, urls ...string) error {
+func (repo *Repository) DeleteURLs(ctx context.Context, user models.UserID, urls ...string) error {
 	return nil
 }
 
@@ -138,7 +139,7 @@ func (repo *Repository) Ping(ctx context.Context) error {
 	return errors.New("not supported with filebase repository")
 }
 
-func (repo *Repository) AddMultipleURLs(ctx context.Context, user models.UserID, urls ...handlers.RequestGetURLs) ([]handlers.ResponseGetURLs, error) {
+func (repo *Repository) AddURLs(ctx context.Context, user models.UserID, urls ...handlers.RequestGetURLs) ([]handlers.ResponseGetURLs, error) {
 	return nil, nil
 }
 

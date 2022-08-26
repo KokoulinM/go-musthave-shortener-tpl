@@ -18,6 +18,7 @@ message RetrieveShortURLRequest {
 
 message RetrieveShortURLResponse {
   string redirect_url = 1;
+  string status = 2;
 }
 
 message CreateShortURLRequest {

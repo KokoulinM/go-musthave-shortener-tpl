@@ -9,13 +9,13 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 
 	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/handlers/middlewares"
 	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/models"
-	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/shortener"
 	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/workers"
 )
 
@@ -30,26 +30,27 @@ import (
 // @Tag.name Shortener
 // @Tag.description "Group of service status requests"
 
-// Repository contains the main methods of getting data from the storage
-type Repository interface {
-	// AddURL - saving a single url to the repository
-	AddURL(ctx context.Context, longURL models.LongURL, shortURL models.ShortURL, user models.UserID) error
+// URLServiceInterface contains the main methods of getting data from the storage
+type URLServiceInterface interface {
+	// CreateURL - saving a single url to the servicesitory
+	//AddURL(ctx context.Context, longURL models.LongURL, shortURL models.ShortURL, user models.UserID) error
+	CreateURL(ctx context.Context, longURL models.LongURL, user models.UserID) (string, error)
 	// GetURL - get a single long url by a short url
 	GetURL(ctx context.Context, shortURL models.ShortURL) (models.ShortURL, error)
 	// GetUserURLs - get a list urls
 	GetUserURLs(ctx context.Context, user models.UserID) ([]ResponseGetURL, error)
-	// DeleteMultipleURLs - deleting a bunch of URLs
-	DeleteMultipleURLs(ctx context.Context, user models.UserID, urls ...string) error
+	// DeleteBatch - deleting a bunch of URLs
+	DeleteBatch(urls []string, userID models.UserID)
 	// Ping - method for checking the operation of the storage
 	Ping(ctx context.Context) error
-	// AddMultipleURLs - adding a bunch of URLs
-	AddMultipleURLs(ctx context.Context, user models.UserID, urls ...RequestGetURLs) ([]ResponseGetURLs, error)
+	// CreateBatch - adding a bunch of URLs
+	CreateBatch(ctx context.Context, urls []RequestGetURLs, userID models.UserID) ([]ResponseGetURLs, error)
 	// GetStates - get a state about count of urls and users
-	GetStates(ctx context.Context) (ResponseStates, error)
+	GetStates(ctx context.Context, ip net.IP) (bool, ResponseStates, error)
 }
 
 type Handlers struct {
-	repo    Repository
+	service URLServiceInterface
 	baseURL string
 	wp      *workers.WorkerPool
 }
@@ -99,9 +100,9 @@ func NewErrorWithDB(err error, title string) error {
 }
 
 // New is the handlers constructor
-func New(repo Repository, baseURL string, wp *workers.WorkerPool) *Handlers {
+func New(service URLServiceInterface, baseURL string, wp *workers.WorkerPool) *Handlers {
 	return &Handlers{
-		repo:    repo,
+		service: service,
 		baseURL: baseURL,
 		wp:      wp,
 	}
@@ -126,7 +127,7 @@ func (h *Handlers) RetrieveShortURL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	url, err := h.repo.GetURL(r.Context(), id)
+	url, err := h.service.GetURL(r.Context(), id)
 	if err != nil {
 		var dbErr *ErrorWithDB
 
@@ -180,9 +181,8 @@ func (h *Handlers) CreateShortURL(w http.ResponseWriter, r *http.Request) {
 	}
 
 	longURL := models.LongURL(body)
-	shortURL := shortener.ShorterURL(longURL)
 
-	err = h.repo.AddURL(r.Context(), longURL, shortURL, userID)
+	shortURL, err := h.service.CreateURL(r.Context(), longURL, userID)
 	if err != nil {
 		var dbErr *ErrorWithDB
 
@@ -260,15 +260,11 @@ func (h *Handlers) ShortenURL(w http.ResponseWriter, r *http.Request) {
 		userID = userIDCtx.(string)
 	}
 
-	shortURL := shortener.ShorterURL(url.URL)
-
-	slURL := fmt.Sprintf("%s/%s", h.baseURL, shortURL)
-
-	err = h.repo.AddURL(r.Context(), url.URL, shortURL, userID)
+	shortURL, err := h.service.CreateURL(r.Context(), url.URL, userID)
 	if err != nil {
 		var dbErr *ErrorWithDB
 		if errors.As(err, &dbErr) && dbErr.Title == "UniqConstraint" {
-			result["result"] = slURL
+			result["result"] = shortURL
 
 			w.Header().Add("Content-Type", "application/json; charset=utf-8")
 			w.WriteHeader(http.StatusConflict)
@@ -292,7 +288,7 @@ func (h *Handlers) ShortenURL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result["result"] = slURL
+	result["result"] = shortURL
 
 	w.Header().Add("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusCreated)
@@ -329,7 +325,7 @@ func (h *Handlers) GetUserURLs(w http.ResponseWriter, r *http.Request) {
 		userID = userIDCtx.(string)
 	}
 
-	urls, err := h.repo.GetUserURLs(r.Context(), userID)
+	urls, err := h.service.GetUserURLs(r.Context(), userID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -389,25 +385,7 @@ func (h *Handlers) DeleteBatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var sliceData [][]string
-
-	for i := 10; i <= len(data); i += 10 {
-		sliceData = append(sliceData, data[i-10:i])
-	}
-
-	rem := len(data) % 10
-	if rem > 0 {
-		sliceData = append(sliceData, data[len(data)-rem:])
-	}
-
-	for _, item := range sliceData {
-		func(taskData []string) {
-			h.wp.Push(func(ctx context.Context) error {
-				err := h.repo.DeleteMultipleURLs(ctx, userID, taskData...)
-				return err
-			})
-		}(item)
-	}
+	h.service.DeleteBatch(data, userID)
 
 	w.WriteHeader(http.StatusAccepted)
 }
@@ -446,7 +424,7 @@ func (h *Handlers) CreateBatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	urls, err := h.repo.AddMultipleURLs(r.Context(), userID, data...)
+	urls, err := h.service.CreateBatch(r.Context(), data, userID)
 	if err != nil {
 		log.Println("err.Error(): ", err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -479,9 +457,14 @@ func (h *Handlers) CreateBatch(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} ResponseStates
 // @Failure 500 {string} string "500 Internal Server Error"
 func (h *Handlers) GetStates(w http.ResponseWriter, r *http.Request) {
-	states, err := h.repo.GetStates(r.Context())
+	hasPermission, states, err := h.service.GetStates(r.Context(), net.ParseIP(r.Header.Get("X-Real-IP")))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if !hasPermission {
+		w.WriteHeader(http.StatusForbidden)
 		return
 	}
 
@@ -500,7 +483,7 @@ func (h *Handlers) GetStates(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) PingDB(w http.ResponseWriter, r *http.Request) {
-	err := h.repo.Ping(r.Context())
+	err := h.service.Ping(r.Context())
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
@@ -510,48 +493,48 @@ func (h *Handlers) PingDB(w http.ResponseWriter, r *http.Request) {
 
 func ExampleHandlerRetrieveShortURL() {
 	rtr := chi.NewRouter()
-	var repo Repository
+	var service URLServiceInterface
 	wp := workers.New(context.Background(), 10, 100)
-	h := New(repo, ":8080", wp)
+	h := New(service, ":8080", wp)
 	rtr.Get("/{id}", h.RetrieveShortURL)
 }
 
 func ExampleHandlerCreateShortURL() {
 	rtr := chi.NewRouter()
-	var repo Repository
+	var service URLServiceInterface
 	wp := workers.New(context.Background(), 10, 100)
-	h := New(repo, ":8080", wp)
+	h := New(service, ":8080", wp)
 	rtr.Post("/", h.CreateShortURL)
 }
 
 func ExampleHandlerShortenURL() {
 	rtr := chi.NewRouter()
-	var repo Repository
+	var service URLServiceInterface
 	wp := workers.New(context.Background(), 10, 100)
-	h := New(repo, ":8080", wp)
+	h := New(service, ":8080", wp)
 	rtr.Post("/api/shorten", h.ShortenURL)
 }
 
 func ExampleHandlerGetUserURLs() {
 	rtr := chi.NewRouter()
-	var repo Repository
+	var service URLServiceInterface
 	wp := workers.New(context.Background(), 10, 100)
-	h := New(repo, ":8080", wp)
+	h := New(service, ":8080", wp)
 	rtr.Get("/api/user/urls", h.GetUserURLs)
 }
 
 func ExampleHandlerDeleteBatch() {
 	rtr := chi.NewRouter()
-	var repo Repository
+	var service URLServiceInterface
 	wp := workers.New(context.Background(), 10, 100)
-	h := New(repo, ":8080", wp)
+	h := New(service, ":8080", wp)
 	rtr.Delete("/api/user/urls", h.DeleteBatch)
 }
 
 func ExampleHandlerCreateBatch() {
 	rtr := chi.NewRouter()
-	var repo Repository
+	var service URLServiceInterface
 	wp := workers.New(context.Background(), 10, 100)
-	h := New(repo, ":8080", wp)
+	h := New(service, ":8080", wp)
 	rtr.Post("/api/shorten/batch", h.CreateBatch)
 }
