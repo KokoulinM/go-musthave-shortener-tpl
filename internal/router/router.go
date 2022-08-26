@@ -7,7 +7,6 @@ import (
 
 	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/configs"
 	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/handlers"
-	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/handlers/middlewares"
 )
 
 // New router constructor
@@ -25,11 +24,7 @@ func New(h *handlers.Handlers, cfg *configs.Config) *chi.Mux {
 		r.Get("/api/user/urls", h.GetUserURLs)
 		r.Delete("/api/user/urls", h.DeleteBatch)
 		r.Post("/api/shorten/batch", h.CreateBatch)
-		router.Route("/api/internal", func(r chi.Router) {
-			r.Use(middlewares.InternalMiddleware(cfg.TrustedSubnet))
-			r.Get("/stats", h.GetStates)
-		})
-
+		r.Get("/api/internal/stats", h.GetStates)
 	})
 
 	return router

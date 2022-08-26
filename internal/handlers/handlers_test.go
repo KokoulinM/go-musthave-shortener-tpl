@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -118,13 +119,13 @@ func TestCreateShortURL(t *testing.T) {
 
 			wp := workers.New(context.Background(), cfg.Workers, cfg.WorkersBuffer)
 
-			repoMock := NewMockRepository(ctrl)
+			repoMock := NewMockURLServiceInterface(ctrl)
 
 			h := New(repoMock, cfg.BaseURL, wp)
 
 			r := router(h)
 
-			repoMock.EXPECT().AddURL(gomock.Any(), tt.body, tt.mockURL, "userID").Return(tt.mockError).AnyTimes()
+			repoMock.EXPECT().CreateURL(gomock.Any(), tt.body, "userID").Return(tt.mockURL, tt.mockError).AnyTimes()
 
 			r.ServeHTTP(w, req.WithContext(context.WithValue(req.Context(), middlewares.UserIDCtxName, "userID")))
 
@@ -198,7 +199,7 @@ func TestRetrieveShortURL(t *testing.T) {
 
 			wp := workers.New(context.Background(), cfg.Workers, cfg.WorkersBuffer)
 
-			repoMock := NewMockRepository(ctrl)
+			repoMock := NewMockURLServiceInterface(ctrl)
 
 			h := New(repoMock, cfg.BaseURL, wp)
 
@@ -232,7 +233,7 @@ func TestShortenURL(t *testing.T) {
 			query:     "/api/shorten",
 			body:      `{"url":"https://go.dev"}`,
 			mockError: nil,
-			mockURL:   "Vq7zU8E5b7sLZo3qY82UKYRvQ-A=",
+			mockURL:   "http://localhost:8080/Vq7zU8E5b7sLZo3qY82UKYRvQ-A=",
 			want: want{
 				code:     http.StatusCreated,
 				response: `{"result":"http://localhost:8080/Vq7zU8E5b7sLZo3qY82UKYRvQ-A="}`,
@@ -243,7 +244,7 @@ func TestShortenURL(t *testing.T) {
 			query:     "/api/shorten",
 			body:      `{"url":"}`,
 			mockError: nil,
-			mockURL:   "Vq7zU8E5b7sLZo3qY82UKYRvQ-A=",
+			mockURL:   "http://localhost:8080/Vq7zU8E5b7sLZo3qY82UKYRvQ-A=",
 			want: want{
 				code:     http.StatusInternalServerError,
 				response: "an unexpected error when unmarshaling JSON\n",
@@ -254,7 +255,7 @@ func TestShortenURL(t *testing.T) {
 			query:     "/api/shorten",
 			body:      `{"url":""}`,
 			mockError: nil,
-			mockURL:   "Vq7zU8E5b7sLZo3qY82UKYRvQ-A=",
+			mockURL:   "http://localhost:8080/Vq7zU8E5b7sLZo3qY82UKYRvQ-A=",
 			want: want{
 				code:     http.StatusBadRequest,
 				response: "the URL property is missing\n",
@@ -265,7 +266,7 @@ func TestShortenURL(t *testing.T) {
 			query:     "/api/shorten",
 			body:      `{"url":"https://go.dev"}`,
 			mockError: NewErrorWithDB(errors.New("UniqConstraint"), "UniqConstraint"),
-			mockURL:   "Vq7zU8E5b7sLZo3qY82UKYRvQ-A=",
+			mockURL:   "http://localhost:8080/Vq7zU8E5b7sLZo3qY82UKYRvQ-A=",
 			want: want{
 				code:     http.StatusConflict,
 				response: "{\"result\":\"http://localhost:8080/Vq7zU8E5b7sLZo3qY82UKYRvQ-A=\"}",
@@ -285,7 +286,7 @@ func TestShortenURL(t *testing.T) {
 
 			wp := workers.New(context.Background(), cfg.Workers, cfg.WorkersBuffer)
 
-			repoMock := NewMockRepository(ctrl)
+			repoMock := NewMockURLServiceInterface(ctrl)
 
 			h := New(repoMock, cfg.BaseURL, wp)
 
@@ -295,7 +296,7 @@ func TestShortenURL(t *testing.T) {
 
 			_ = json.Unmarshal(bytes.NewBufferString(tt.body).Bytes(), &url)
 
-			repoMock.EXPECT().AddURL(gomock.Any(), url.URL, tt.mockURL, "userID").Return(tt.mockError).AnyTimes()
+			repoMock.EXPECT().CreateURL(gomock.Any(), url.URL, "userID").Return(tt.mockURL, tt.mockError).AnyTimes()
 
 			r.ServeHTTP(w, req.WithContext(context.WithValue(req.Context(), middlewares.UserIDCtxName, "userID")))
 
@@ -358,7 +359,7 @@ func TestGetUserURLs(t *testing.T) {
 
 			wp := workers.New(context.Background(), cfg.Workers, cfg.WorkersBuffer)
 
-			repoMock := NewMockRepository(ctrl)
+			repoMock := NewMockURLServiceInterface(ctrl)
 
 			h := New(repoMock, cfg.BaseURL, wp)
 
@@ -429,13 +430,13 @@ func TestDeleteBatch(t *testing.T) {
 
 			wp := workers.New(context.Background(), cfg.Workers, cfg.WorkersBuffer)
 
-			repoMock := NewMockRepository(ctrl)
+			repoMock := NewMockURLServiceInterface(ctrl)
 
 			h := New(repoMock, cfg.BaseURL, wp)
 
 			r := router(h)
 
-			repoMock.EXPECT().DeleteMultipleURLs(gomock.Any(), "userID", tt.mockURLs).Return(tt.mockError).AnyTimes()
+			repoMock.EXPECT().DeleteBatch(tt.mockURLs, "userID").AnyTimes()
 
 			r.ServeHTTP(w, req.WithContext(context.WithValue(req.Context(), middlewares.UserIDCtxName, "userID")))
 
@@ -492,13 +493,13 @@ func TestCreateBatch(t *testing.T) {
 
 			wp := workers.New(context.Background(), cfg.Workers, cfg.WorkersBuffer)
 
-			repoMock := NewMockRepository(ctrl)
+			repoMock := NewMockURLServiceInterface(ctrl)
 
 			h := New(repoMock, cfg.BaseURL, wp)
 
 			r := router(h)
 
-			repoMock.EXPECT().AddMultipleURLs(gomock.Any(), "userID", tt.mockReqURLs).Return(tt.mockResURLs, tt.mockError).AnyTimes()
+			repoMock.EXPECT().CreateBatch(gomock.Any(), tt.mockReqURLs, "userID").Return(tt.mockResURLs, tt.mockError).AnyTimes()
 
 			r.ServeHTTP(w, req.WithContext(context.WithValue(req.Context(), middlewares.UserIDCtxName, "userID")))
 
@@ -520,14 +521,18 @@ func TestHandlers_GetStates(t *testing.T) {
 		response string
 	}
 	tests := []struct {
-		name      string
-		query     string
-		mockState ResponseStates
-		want      want
+		name           string
+		query          string
+		mockAllowedURL net.IP
+		isAllowed      bool
+		mockState      ResponseStates
+		want           want
 	}{
 		{
-			name:  "Test #1",
-			query: "/api/internal/states",
+			name:           "Test #1",
+			query:          "/api/internal/states",
+			mockAllowedURL: net.ParseIP("http://localhost:3333"),
+			isAllowed:      true,
 			mockState: ResponseStates{
 				Urls:  7,
 				Users: 3,
@@ -550,13 +555,13 @@ func TestHandlers_GetStates(t *testing.T) {
 
 			wp := workers.New(context.Background(), cfg.Workers, cfg.WorkersBuffer)
 
-			repoMock := NewMockRepository(ctrl)
+			repoMock := NewMockURLServiceInterface(ctrl)
 
 			h := New(repoMock, cfg.BaseURL, wp)
 
 			r := router(h)
 
-			repoMock.EXPECT().GetStates(gomock.Any()).Return(tt.mockState, nil).AnyTimes()
+			repoMock.EXPECT().GetStates(gomock.Any(), tt.mockAllowedURL).Return(tt.isAllowed, tt.mockState, nil).AnyTimes()
 
 			r.ServeHTTP(w, req.WithContext(context.WithValue(req.Context(), middlewares.UserIDCtxName, "userID")))
 

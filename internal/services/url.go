@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"fmt"
 	"net"
 
 	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/handlers"
@@ -43,7 +44,7 @@ func (us *URLService) GetURL(ctx context.Context, userID models.UserID) (string,
 func (us *URLService) CreateURL(ctx context.Context, longURL models.LongURL, user models.UserID) (string, error) {
 	shortURL := shortener.ShorterURL(longURL)
 	err := us.repo.AddURL(ctx, longURL, shortURL, user)
-	return us.baseURL + shortURL, err
+	return fmt.Sprintf("%s/%s", us.baseURL, shortURL), err
 }
 
 func (us *URLService) GetUserURLs(ctx context.Context, userID models.UserID) ([]handlers.ResponseGetURL, error) {

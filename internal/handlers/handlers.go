@@ -33,7 +33,6 @@ import (
 // URLServiceInterface contains the main methods of getting data from the storage
 type URLServiceInterface interface {
 	// CreateURL - saving a single url to the servicesitory
-	//AddURL(ctx context.Context, longURL models.LongURL, shortURL models.ShortURL, user models.UserID) error
 	CreateURL(ctx context.Context, longURL models.LongURL, user models.UserID) (string, error)
 	// GetURL - get a single long url by a short url
 	GetURL(ctx context.Context, shortURL models.ShortURL) (models.ShortURL, error)
