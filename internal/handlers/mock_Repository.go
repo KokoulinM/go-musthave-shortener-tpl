@@ -34,23 +34,18 @@ func (m *MockURLServiceInterface) EXPECT() *MockURLServiceInterfaceMockRecorder 
 }
 
 // CreateBatch mocks base method.
-func (m *MockURLServiceInterface) CreateBatch(ctx context.Context, urls []RequestGetURLs, user models.UserID) ([]ResponseGetURLs, error) {
+func (m *MockURLServiceInterface) CreateBatch(ctx context.Context, urls []RequestGetURLs, userID models.UserID) ([]ResponseGetURLs, error) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, user}
-	for _, a := range urls {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "CreateBatch", varargs...)
+	ret := m.ctrl.Call(m, "CreateBatch", ctx, urls, userID)
 	ret0, _ := ret[0].([]ResponseGetURLs)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// CreateBatch indicates an expected call of AddMultipleURLs.
-func (mr *MockURLServiceInterfaceMockRecorder) CreateBatch(ctx interface{}, urls []RequestGetURLs, user interface{}) *gomock.Call {
+// CreateBatch indicates an expected call of CreateBatch.
+func (mr *MockURLServiceInterfaceMockRecorder) CreateBatch(ctx, urls, userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, urls, user})
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateBatch", reflect.TypeOf((*MockURLServiceInterface)(nil).CreateBatch), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateBatch", reflect.TypeOf((*MockURLServiceInterface)(nil).CreateBatch), ctx, urls, userID)
 }
 
 // CreateURL mocks base method.
