@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -31,7 +30,7 @@ import (
 )
 
 var (
-	httpServer   *http.Server
+	httpServer   *server.Server
 	grpcServer   *grpc.Server
 	buildVersion = "N/A"
 	buildDate    = "N/A"
@@ -48,8 +47,6 @@ func main() {
 		log.Fatal("There was a problem when generating the certificate")
 	}
 
-	var httpServer *server.Server
-
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -62,6 +59,9 @@ func main() {
 
 	var service *services.URLService
 	_, subnet, err := net.ParseCIDR(cfg.TrustedSubnet)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	wp := workers.New(ctx, cfg.Workers, cfg.WorkersBuffer)
 
