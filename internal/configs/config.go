@@ -20,6 +20,7 @@ const (
 	DefaultWorkers         = 10
 	DefaultWorkersBuffer   = 100
 	DefaultEnableHttps     = false
+	DefaultTrustedSubnet   = "127.0.0.1/24"
 	DefaultGRPCPort        = 5000
 )
 
@@ -60,6 +61,7 @@ func defaultConfig() Config {
 		Workers:         DefaultWorkers,
 		WorkersBuffer:   DefaultWorkersBuffer,
 		EnableHttps:     DefaultEnableHttps,
+		TrustedSubnet:   DefaultTrustedSubnet,
 		GRPCPort:        DefaultGRPCPort,
 	}
 }
