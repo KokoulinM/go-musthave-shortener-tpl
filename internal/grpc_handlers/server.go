@@ -1,4 +1,5 @@
-package grpc_handlers
+// Package grpchandlers provide methods for working with grpc
+package grpchandlers
 
 import (
 	"context"

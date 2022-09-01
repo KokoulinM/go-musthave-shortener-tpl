@@ -89,7 +89,7 @@ func main() {
 	g, ctx := errgroup.WithContext(ctx)
 
 	h := handlers.New(service, cfg.BaseURL, wp)
-	grpcHandler := grpc_handlers.NewGRPCHandler(service)
+	grpcHandler := grpchandlers.NewGRPCHandler(service)
 
 	mux := router.New(h, cfg)
 
