@@ -1,3 +1,4 @@
+// Package errors contains error models
 package errors
 
 import (

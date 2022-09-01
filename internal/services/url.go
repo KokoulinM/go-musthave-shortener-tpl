@@ -1,3 +1,4 @@
+// Package services provides methods for work with app
 package services
 
 import (

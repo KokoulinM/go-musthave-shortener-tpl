@@ -4,6 +4,7 @@
 // 	protoc        v3.21.5
 // source: internal/proto/urls.proto
 
+// Package pb generated code for grpc
 package pb
 
 import (
