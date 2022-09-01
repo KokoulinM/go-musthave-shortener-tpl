@@ -189,9 +189,7 @@ func (h *Handlers) CreateShortURL(w http.ResponseWriter, r *http.Request) {
 
 			w.WriteHeader(http.StatusConflict)
 
-			slURL := fmt.Sprintf("%s/%s", h.baseURL, shortURL)
-
-			_, err = w.Write([]byte(slURL))
+			_, err = w.Write([]byte(shortURL))
 			if err != nil {
 				http.Error(w, "unexpected error when writing the response body", http.StatusInternalServerError)
 			}
@@ -206,9 +204,7 @@ func (h *Handlers) CreateShortURL(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "text/plain; charset=utf-8")
 	w.WriteHeader(http.StatusCreated)
 
-	slURL := fmt.Sprintf("%s/%s", h.baseURL, shortURL)
-
-	_, err = w.Write([]byte(slURL))
+	_, err = w.Write([]byte(shortURL))
 	if err != nil {
 		http.Error(w, "unexpected error when writing the response body", http.StatusInternalServerError)
 	}

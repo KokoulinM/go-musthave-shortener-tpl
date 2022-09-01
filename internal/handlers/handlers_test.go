@@ -62,7 +62,7 @@ func TestCreateShortURL(t *testing.T) {
 			query:     "/",
 			body:      "https://go.dev",
 			mockError: nil,
-			mockURL:   "Vq7zU8E5b7sLZo3qY82UKYRvQ-A=",
+			mockURL:   "http://localhost:8080/Vq7zU8E5b7sLZo3qY82UKYRvQ-A=",
 			want: want{
 				code:        http.StatusCreated,
 				response:    "http://localhost:8080/Vq7zU8E5b7sLZo3qY82UKYRvQ-A=",
@@ -74,7 +74,7 @@ func TestCreateShortURL(t *testing.T) {
 			query:     "/",
 			body:      "",
 			mockError: nil,
-			mockURL:   "Vq7zU8E5b7sLZo3qY82UKYRvQ-A=",
+			mockURL:   "http://localhost:8080/Vq7zU8E5b7sLZo3qY82UKYRvQ-A=",
 			want: want{
 				code:        http.StatusBadRequest,
 				contentType: "text/plain; charset=utf-8",
@@ -86,7 +86,7 @@ func TestCreateShortURL(t *testing.T) {
 			query:     "/",
 			body:      "https://go.dev",
 			mockError: errors.New("error"),
-			mockURL:   "Vq7zU8E5b7sLZo3qY82UKYRvQ-A=",
+			mockURL:   "http://localhost:8080/Vq7zU8E5b7sLZo3qY82UKYRvQ-A=",
 			want: want{
 				code:        http.StatusInternalServerError,
 				contentType: "text/plain; charset=utf-8",
@@ -98,7 +98,7 @@ func TestCreateShortURL(t *testing.T) {
 			query:     "/",
 			body:      "https://go.dev",
 			mockError: NewErrorWithDB(errors.New("UniqConstraint"), "UniqConstraint"),
-			mockURL:   "Vq7zU8E5b7sLZo3qY82UKYRvQ-A=",
+			mockURL:   "http://localhost:8080/Vq7zU8E5b7sLZo3qY82UKYRvQ-A=",
 			want: want{
 				code:        http.StatusConflict,
 				contentType: "text/plain; charset=utf-8",

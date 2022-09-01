@@ -205,7 +205,7 @@ func (db *PostgresDatabase) GetUserURLs(ctx context.Context, user models.UserID)
 		if err != nil {
 			return result, err
 		}
-		u.ShortURL = db.baseURL + u.ShortURL
+		u.ShortURL = fmt.Sprintf("%s/%s", db.baseURL, u.ShortURL)
 		result = append(result, u)
 	}
 
