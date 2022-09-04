@@ -20,6 +20,8 @@ const (
 	DefaultWorkers         = 10
 	DefaultWorkersBuffer   = 100
 	DefaultEnableHttps     = false
+	DefaultTrustedSubnet   = "127.0.0.1/24"
+	DefaultGRPCPort        = 5000
 )
 
 // Config contains app configuration.
@@ -37,9 +39,13 @@ type Config struct {
 	// Workers - number of workers
 	Workers int `env:"WORKERS"`
 	// WorkersBuffer - buffer size value
-	WorkersBuffer int    `env:"WORKERS_BUFFER"`
-	EnableHttps   bool   `env:"ENABLE_HTTPS" json:"ENABLE_HTTPS"`
-	Config        string `env:"CONFIG"`
+	WorkersBuffer int  `env:"WORKERS_BUFFER"`
+	EnableHttps   bool `env:"ENABLE_HTTPS" json:"ENABLE_HTTPS"`
+	// Config - configuration file
+	Config string `env:"CONFIG"`
+	// TrustedSubnet - available url for internal requests
+	TrustedSubnet string `env:"TRUSTED_SUBNET" json:"trusted_subnet"`
+	GRPCPort      int    `env:"GRPC_PORT" json:"grpc_port"`
 }
 
 // The function checks for the presence of a flag. f - flag values
@@ -55,6 +61,8 @@ func defaultConfig() Config {
 		Workers:         DefaultWorkers,
 		WorkersBuffer:   DefaultWorkersBuffer,
 		EnableHttps:     DefaultEnableHttps,
+		TrustedSubnet:   DefaultTrustedSubnet,
+		GRPCPort:        DefaultGRPCPort,
 	}
 }
 
@@ -137,6 +145,10 @@ func New() *Config {
 
 	if checkExists("s") {
 		flag.BoolVar(&c.EnableHttps, "s", c.EnableHttps, "EnableHttps")
+	}
+
+	if checkExists("t") {
+		flag.StringVar(&c.TrustedSubnet, "t", c.TrustedSubnet, "TrustedSubnet")
 	}
 
 	flag.Parse()

@@ -5,24 +5,26 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
+	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/configs"
 	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/handlers"
 )
 
 // New router constructor
-func New(h *handlers.Handlers) *chi.Mux {
+func New(h *handlers.Handlers, cfg *configs.Config) *chi.Mux {
 	router := chi.NewRouter()
 
 	router.Use(middleware.Logger)
 	router.Use(middleware.Recoverer)
 
 	router.Route("/", func(r chi.Router) {
-		router.Post("/", h.CreateShortURL)
-		router.Get("/{id}", h.RetrieveShortURL)
-		router.Get("/ping", h.PingDB)
-		router.Post("/api/shorten", h.ShortenURL)
-		router.Get("/api/user/urls", h.GetUserURLs)
-		router.Delete("/api/user/urls", h.DeleteBatch)
-		router.Post("/api/shorten/batch", h.CreateBatch)
+		r.Post("/", h.CreateShortURL)
+		r.Get("/{id}", h.RetrieveShortURL)
+		r.Get("/ping", h.PingDB)
+		r.Post("/api/shorten", h.ShortenURL)
+		r.Get("/api/user/urls", h.GetUserURLs)
+		r.Delete("/api/user/urls", h.DeleteBatch)
+		r.Post("/api/shorten/batch", h.CreateBatch)
+		r.Get("/api/internal/stats", h.GetStates)
 	})
 
 	return router

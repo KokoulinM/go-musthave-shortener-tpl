@@ -28,7 +28,7 @@ func BenchmarkHandlers_RetrieveShortURL(b *testing.B) {
 
 		defer wp.Stop()
 
-		repoMock := NewMockRepository(ctrl)
+		repoMock := NewMockURLServiceInterface(ctrl)
 
 		h := New(repoMock, cfg.BaseURL, wp)
 

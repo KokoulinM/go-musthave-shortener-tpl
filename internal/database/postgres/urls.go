@@ -9,6 +9,7 @@ import (
 
 	"github.com/jackc/pgerrcode"
 	"github.com/lib/pq"
+	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/services"
 
 	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/handlers"
 	"github.com/mkokoulin/go-musthave-shortener-tpl/internal/models"
@@ -32,8 +33,8 @@ func DatabaseRepository(baseURL string, db *sql.DB) *PostgresDatabase {
 	}
 }
 
-func NewDatabaseRepository(baseURL string, db *sql.DB) handlers.Repository {
-	return handlers.Repository(DatabaseRepository(baseURL, db))
+func NewDatabaseRepository(baseURL string, db *sql.DB) services.RepositoryInterface {
+	return services.RepositoryInterface(DatabaseRepository(baseURL, db))
 }
 
 func (db *PostgresDatabase) AddURL(ctx context.Context, longURL models.LongURL, shortURL models.ShortURL, user models.UserID) error {
@@ -53,7 +54,7 @@ func (db *PostgresDatabase) AddURL(ctx context.Context, longURL models.LongURL, 
 	return err
 }
 
-func (db *PostgresDatabase) AddMultipleURLs(ctx context.Context, user models.UserID, urls ...handlers.RequestGetURLs) ([]handlers.ResponseGetURLs, error) {
+func (db *PostgresDatabase) AddURLs(ctx context.Context, user models.UserID, urls ...handlers.RequestGetURLs) ([]handlers.ResponseGetURLs, error) {
 	var result []handlers.ResponseGetURLs
 
 	tx, err := db.conn.Begin()
@@ -100,7 +101,7 @@ func (db *PostgresDatabase) AddMultipleURLs(ctx context.Context, user models.Use
 	return result, nil
 }
 
-func (db *PostgresDatabase) DeleteMultipleURLs(ctx context.Context, user models.UserID, urls ...string) error {
+func (db *PostgresDatabase) DeleteURLs(ctx context.Context, user models.UserID, urls ...string) error {
 	tx, err := db.conn.Begin()
 	if err != nil {
 		return err
@@ -204,8 +205,23 @@ func (db *PostgresDatabase) GetUserURLs(ctx context.Context, user models.UserID)
 		if err != nil {
 			return result, err
 		}
-		u.ShortURL = db.baseURL + u.ShortURL
+		u.ShortURL = fmt.Sprintf("%s/%s", db.baseURL, u.ShortURL)
 		result = append(result, u)
+	}
+
+	return result, nil
+}
+
+func (db *PostgresDatabase) GetStates(ctx context.Context) (handlers.ResponseStates, error) {
+	sqlGetStates := `SELECT COUNT(*), COUNT(DISTINCT user_id) FROM urls;`
+
+	row := db.conn.QueryRowContext(ctx, sqlGetStates)
+
+	result := handlers.ResponseStates{}
+
+	err := row.Scan(&result.Urls, &result.Users)
+	if err != nil {
+		return result, err
 	}
 
 	return result, nil
